@@ -392,6 +392,16 @@ function buildSmoothSpline(pts: { x: number; y: number }[]): string {
                 <div className="w-3 h-3 rounded-full bg-white border-2 border-slate-950 shadow-lg" />
               </div>
             )}
+
+            {/* T0 Baseline Guideline Tag inside canvas (floats directly on dashed guideline) */}
+            {benchmarkPrice && benchmarkYPercent !== null && (
+              <div
+                className="absolute right-2 transform -translate-y-full -mt-0.5 px-2 py-0.5 rounded bg-sky-950/90 border border-sky-500/70 text-[9px] font-mono text-sky-300 font-bold shadow-md pointer-events-none z-10"
+                style={{ top: `${benchmarkYPercent}%` }}
+              >
+                T₀ ₹{benchmarkPrice.toFixed(2)}
+              </div>
+            )}
           </div>
 
           {/* Crosshair Cursor Hairlines */}
@@ -432,16 +442,6 @@ function buildSmoothSpline(pts: { x: number; y: number }[]): string {
               ₹{price.toFixed(1)}
             </div>
           ))}
-
-          {/* T0 Baseline Pill on Y-Axis (if in visible range) */}
-          {benchmarkPrice && benchmarkYPercent !== null && (
-            <div
-              className="absolute right-1 transform -translate-y-1/2 px-1.5 py-0.5 rounded bg-sky-950 border border-sky-500/60 text-[9px] font-mono text-sky-300 font-bold shadow pointer-events-none z-20"
-              style={{ top: `${benchmarkYPercent}%` }}
-            >
-              T₀ ₹{benchmarkPrice.toFixed(0)}
-            </div>
-          )}
 
           {/* Current Live Price Pill on Y-Axis (dynamically tracked to real price coordinate) */}
           <div
