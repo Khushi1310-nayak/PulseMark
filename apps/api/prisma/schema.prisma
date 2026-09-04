@@ -1,0 +1,74 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id          String         @id @default(uuid())
+  email       String?        @unique
+  name        String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  watchlists  Watchlist[]
+  snapshots   UserSnapshot[]
+  lastActiveAt DateTime      @default(now())
+}
+
+model Watchlist {
+  id          String          @id @default(uuid())
+  userId      String
+  name        String
+  description String?
+  isDefault   Boolean         @default(false)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items       WatchlistItem[]
+
+  @@index([userId])
+}
+
+model WatchlistItem {
+  id          String    @id @default(uuid())
+  watchlistId String
+  symbol      String
+  name        String
+  orderIndex  Int       @default(0)
+  addedAt     DateTime  @default(now())
+  watchlist   Watchlist @relation(fields: [watchlistId], references: [id], onDelete: Cascade)
+
+  @@unique([watchlistId, symbol])
+  @@index([watchlistId])
+}
+
+model UserSnapshot {
+  id             String   @id @default(uuid())
+  userId         String
+  benchmarkTime  DateTime @default(now())
+  benchmarkLabel String
+  marketStatus   String   @default("OPEN")
+  priceSnapshot  String   // JSON encoded Record<symbol, BenchmarkPricePoint>
+  createdAt      DateTime @default(now())
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model AnomalyAuditLog {
+  id              String   @id @default(uuid())
+  symbol          String
+  triggerType     String
+  title           String
+  details         String
+  deltaAtTrigger  Float
+  priceAtTrigger  Float
+  severity        String   @default("high")
+  timestamp       DateTime @default(now())
+
+  @@index([symbol])
+  @@index([timestamp])
+}

@@ -1,0 +1,22 @@
+{
+  "name": "pulsemark-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces --if-present",
+    "dev:api": "npm run dev --workspace=@pulsemark/api",
+    "dev:web": "npm run dev --workspace=@pulsemark/web",
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "start": "npm run start --workspaces --if-present",
+    "start:api": "npm run start --workspace=@pulsemark/api",
+    "start:web": "npm run start --workspace=@pulsemark/web"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  }
+}
