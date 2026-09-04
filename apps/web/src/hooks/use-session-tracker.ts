@@ -20,31 +20,22 @@ export function useSessionTracker() {
     api.sendHeartbeat().catch(() => {});
 
     // 2. Lifecycle Decision: navigator.sendBeacon for Reliable Session Snapshotting (T0)
-    // When a user closes the tab, navigates away, or hides the browser window, standard fetch/XHR
-    // calls are often cancelled mid-flight. navigator.sendBeacon guarantees asynchronous transmission
-    // in the browser networking thread even after page destruction, reliably committing the exit snapshot.
-    const handleUnloadOrHide = () => {
+    // When a user closes the tab or navigates away, sendBeacon commits the exit snapshot.
+    const handleUnload = () => {
       if (typeof navigator !== 'undefined' && typeof navigator.sendBeacon === 'function') {
         const cleanApiBase = getCleanApiBase();
         const url = cleanApiBase ? `${cleanApiBase}/api/session/snapshot` : '/api/session/snapshot';
         const payload = JSON.stringify({ timestamp: new Date().toISOString() });
-        navigator.sendBeacon(url, payload);
+        const blob = new Blob([payload], { type: 'application/json' });
+        navigator.sendBeacon(url, blob);
       }
     };
 
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'hidden') {
-        handleUnloadOrHide();
-      }
-    };
-
-    window.addEventListener('beforeunload', handleUnloadOrHide);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('beforeunload', handleUnload);
 
     return () => {
       clearInterval(heartbeatInterval);
-      window.removeEventListener('beforeunload', handleUnloadOrHide);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('beforeunload', handleUnload);
     };
   }, []);
 }

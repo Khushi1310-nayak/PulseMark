@@ -45,6 +45,7 @@ function DashboardContent() {
     feedHealth,
     flashStates,
     refreshSession,
+    applyImmediateState,
   } = useMarketStream();
 
   useSessionTracker();
@@ -127,13 +128,17 @@ function DashboardContent() {
                 <span className="text-xs font-mono font-bold text-slate-200 uppercase tracking-wide">
                   Active Session Baseline (T₀)
                 </span>
-                {snapshot?.isFirstSession ? (
+                {snapshot?.benchmarkLabel ? (
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-medium">
+                    {snapshot.benchmarkLabel}
+                  </span>
+                ) : snapshot?.isFirstSession ? (
                   <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-medium">
                     09:15 AM Market Open (First Session Today)
                   </span>
                 ) : (
                   <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300">
-                    {snapshot?.benchmarkLabel || 'Today at 09:15 AM (Market Open)'}
+                    Today at 09:15 AM (Market Open)
                   </span>
                 )}
               </div>
@@ -182,6 +187,7 @@ function DashboardContent() {
         isOpen={isEvaluatorOpen}
         onClose={() => setIsEvaluatorOpen(false)}
         onStateUpdated={() => refreshSession()}
+        onApplyState={(payload) => applyImmediateState(payload)}
         currentBenchmarkLabel={snapshot?.benchmarkLabel}
         isCircuitBreakerTripped={feedHealth?.isCircuitBreakerTripped}
       />

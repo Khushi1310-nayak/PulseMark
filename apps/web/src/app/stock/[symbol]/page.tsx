@@ -296,17 +296,18 @@ export default function StockDeepDivePage() {
 
           {/* SVG Intraday Chart */}
           <div className="h-64 w-full bg-slate-950/80 rounded-lg p-4 relative border border-slate-800/80 overflow-hidden flex items-end">
-            <svg className="w-full h-full overflow-visible">
+            <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="w-full h-full overflow-visible">
               {/* Horizontal Grid lines */}
-              {[0.25, 0.5, 0.75].map((pct, i) => (
+              {[25, 50, 75].map((pct, i) => (
                 <line
                   key={i}
                   x1="0"
-                  y1={`${pct * 100}%`}
-                  x2="100%"
-                  y2={`${pct * 100}%`}
+                  y1={pct}
+                  x2="100"
+                  y2={pct}
                   stroke="rgba(30, 41, 59, 0.4)"
                   strokeDasharray="4 4"
+                  vectorEffect="non-scaling-stroke"
                 />
               ))}
 
@@ -320,23 +321,25 @@ export default function StockDeepDivePage() {
                   <g key={idx} className="cursor-pointer" onClick={() => setSelectedCandle(candle)}>
                     {candle.isAnomalyPoint && (
                       <circle
-                        cx={`${xPct}%`}
-                        cy={`${yPct}%`}
-                        r="6"
+                        cx={xPct}
+                        cy={yPct}
+                        r="4"
                         fill="rgba(244, 63, 94, 0.4)"
                         stroke="#F43F5E"
-                        strokeWidth="2"
+                        strokeWidth="1.5"
+                        vectorEffect="non-scaling-stroke"
                         className="animate-ping"
                       />
                     )}
 
                     <circle
-                      cx={`${xPct}%`}
-                      cy={`${yPct}%`}
-                      r={candle.isAnomalyPoint ? '5' : isSelected ? '4' : '2.5'}
+                      cx={xPct}
+                      cy={yPct}
+                      r={candle.isAnomalyPoint ? '3.5' : isSelected ? '3' : '1.8'}
                       fill={candle.isAnomalyPoint ? '#F43F5E' : isSelected ? '#10B981' : '#64748B'}
                       stroke={isSelected ? '#FFFFFF' : 'none'}
-                      strokeWidth="1.5"
+                      strokeWidth="1"
+                      vectorEffect="non-scaling-stroke"
                     />
                   </g>
                 );
@@ -348,12 +351,13 @@ export default function StockDeepDivePage() {
                   .map((c, i) => {
                     const x = (i / (safeHistory.length - 1 || 1)) * 100;
                     const y = 100 - ((c.close - minPrice) / priceRange) * 100;
-                    return `${x}%,${y}%`;
+                    return `${x.toFixed(2)},${y.toFixed(2)}`;
                   })
                   .join(' L ')}`}
                 fill="none"
                 stroke={isPositiveDelta ? '#10B981' : '#F43F5E'}
                 strokeWidth="2"
+                vectorEffect="non-scaling-stroke"
               />
             </svg>
           </div>

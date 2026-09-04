@@ -178,8 +178,17 @@ export function useMarketStream() {
     }
   }, [handleIncomingPayload]);
 
+  const applyImmediateState = useCallback(
+    (payload: any) => {
+      if (!payload) return;
+      handleIncomingPayload(payload);
+    },
+    [handleIncomingPayload]
+  );
+
   return {
     ...data,
     refreshSession,
+    applyImmediateState,
   };
 }

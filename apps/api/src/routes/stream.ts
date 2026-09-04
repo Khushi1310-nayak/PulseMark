@@ -58,6 +58,7 @@ export const streamRoutes: FastifyPluginAsync = async (fastify) => {
         const payload = JSON.stringify({
           type: 'TICK_UPDATE',
           timestamp: new Date().toISOString(),
+          snapshot: evaluated.snapshot,
           ticks,
           attentionDesk: evaluated.attentionDesk,
           allEvaluations: evaluated.allEvaluations,

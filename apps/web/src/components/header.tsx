@@ -181,9 +181,8 @@ export function Header({
               <Clock className="w-3 h-3 text-emerald-400 shrink-0" />
               <span className="text-[11px] text-slate-400">Baseline (T₀):</span>
               <span className="font-mono text-slate-200 text-[11px] font-medium">
-                {snapshot?.isFirstSession
-                  ? '09:15 AM Market Open'
-                  : snapshot?.benchmarkLabel ?? '09:15 AM'}
+                {snapshot?.benchmarkLabel ||
+                  (snapshot?.isFirstSession ? '09:15 AM Market Open' : '09:15 AM')}
               </span>
               <button
                 onClick={onSnapshotNow}
