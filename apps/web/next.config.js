@@ -1,8 +1,14 @@
+const path = require('path');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ['@pulsemark/shared'],
   webpack: (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@pulsemark/shared': path.resolve(__dirname, '../../packages/shared/src/index.ts'),
+    };
     config.resolve.extensionAlias = {
       '.js': ['.ts', '.tsx', '.js', '.jsx'],
       '.mjs': ['.mts', '.mjs'],
