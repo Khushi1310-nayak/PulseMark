@@ -21,7 +21,7 @@ PulseMark transforms static watchlist monitoring into an intelligent, proactive 
 ### Inherent Flaws of Traditional Stock Watchlists
 
 1. **Naive Daily Percentage Change:**  
-   Traditional tools display $\Delta P = \frac{P_{\text{current}} - P_{\text{prev\_close}}}{P_{\text{prev\_close}}}$. If a stock opened $+3\%$ at 9:15 AM and drifts sideways all day, it shows $+3\%$ green, masking the reality that nothing has happened for 4 hours. Conversely, if a stock was flat all morning and suddenly drops $-2\%$ in 10 minutes, the daily change shows only $-1\%$, failing to highlight the sudden flash move.
+   Traditional tools display $\Delta P = \frac{P_{\text{current}} - P_{\text{prevClose}}}{P_{\text{prevClose}}}$. If a stock opened $+3\%$ at 9:15 AM and drifts sideways all day, it shows $+3\%$ green, masking the reality that nothing has happened for 4 hours. Conversely, if a stock was flat all morning and suddenly drops $-2\%$ in 10 minutes, the daily change shows only $-1\%$, failing to highlight the sudden flash move.
 
 2. **The "Cognitive Memory Tax":**  
    Traders must constantly remember: *"Where was Tata Motors when I stepped away for lunch?"* or *"Did Reliance cross its morning resistance while I was in a meeting?"* Human memory degrades across session intervals, leading to missed trades or delayed risk management.
@@ -74,39 +74,39 @@ Every incoming market tick is evaluated through a deterministic scoring function
 
 $$\text{Composite Score} = \min\left(100, S_{\text{price}} + S_{\text{volume}} + S_{\text{range}} + S_{\text{vwap}}\right)$$
 
-#### Factor 1: Price Delta vs. Session Baseline ($S_{\text{price}}$, Max 45 pts)
+#### Factor 1: Price Delta vs. Session Baseline (Price Delta, Max 45 pts)
 
-$$\Delta P_{\%} = \left|\frac{P_{\text{current}} - P_{T_0}}{P_{T_0}}\right| \times 100$$
+$$\Delta P_{\text{percent}} = \left|\frac{P_{\text{current}} - P_{T_0}}{P_{T_0}}\right| \times 100$$
 
-- $\Delta P_{\%} \ge 3.0\% \implies 45\text{ pts}$ (Critical flash movement)
-- $\Delta P_{\%} \ge 1.5\% \implies 30\text{ pts}$ (Substantial shift)
-- $\Delta P_{\%} \ge 0.8\% \implies 15\text{ pts}$ (Moderate drift)
-- $\Delta P_{\%} < 0.8\% \implies 0\text{ pts}$
+- **Delta $\ge +3.0\%$:** +45 pts (Critical flash movement)
+- **Delta $\ge +1.5\%$:** +30 pts (Substantial shift)
+- **Delta $\ge +0.8\%$:** +15 pts (Moderate drift)
+- **Delta $< +0.8\%$:** 0 pts
 
-#### Factor 2: Volume Surge vs. 30-Day Trailing Baseline ($S_{\text{volume}}$, Max 30 pts)
+#### Factor 2: Volume Surge vs. 30-Day Trailing Baseline (Volume Ratio, Max 30 pts)
 
-$$\text{Ratio}_{\text{vol}} = \frac{V_{\text{current}}}{\bar{V}_{30\text{d}} / 6.25\text{ hours}}$$
+$$\text{Ratio}_{\text{vol}} = \frac{V_{\text{current}}}{\bar{V}_{\text{baseline}}}$$
 
-- $\text{Ratio}_{\text{vol}} \ge 3.0\times \implies 30\text{ pts}$ (Aggressive institutional presence)
-- $\text{Ratio}_{\text{vol}} \ge 2.0\times \implies 20\text{ pts}$ (Elevated trading activity)
-- $\text{Ratio}_{\text{vol}} \ge 1.5\times \implies 10\text{ pts}$ (Above-average participation)
+- **Ratio $\ge 3.0\times$:** +30 pts (Aggressive institutional presence)
+- **Ratio $\ge 2.0\times$:** +20 pts (Elevated trading activity)
+- **Ratio $\ge 1.5\times$:** +10 pts (Above-average participation)
 
-#### Factor 3: Intraday Session Range Breach ($S_{\text{range}}$, Max 15 pts)
+#### Factor 3: Intraday Session Range Breach (Range Breach, Max 15 pts)
 
-- High Breakout: $P_{\text{current}} > \text{DayHigh}_{T_0} \implies 15\text{ pts}$ (Resistance pierced)
-- Low Breakdown: $P_{\text{current}} < \text{DayLow}_{T_0} \implies 15\text{ pts}$ (Support breached)
+- **High Breakout ($P_{\text{current}} > \text{DayHigh}_{T_0}$):** +15 pts (Resistance pierced)
+- **Low Breakdown ($P_{\text{current}} < \text{DayLow}_{T_0}$):** +15 pts (Support breached)
 
-#### Factor 4: VWAP Divergence ($S_{\text{vwap}}$, Max 10 pts)
+#### Factor 4: VWAP Divergence (VWAP Divergence, Max 10 pts)
 
 $$\text{Div}_{\text{vwap}} = \left|\frac{P_{\text{current}} - \text{VWAP}}{\text{VWAP}}\right| \times 100$$
 
-- $\text{Div}_{\text{vwap}} \ge 1.5\% \implies 10\text{ pts}$ (Intraday price unanchored from mean)
+- **Divergence $\ge 1.5\%$:** +10 pts (Intraday price unanchored from mean)
 
 #### Decision Rule
 
 An equity is automatically elevated to the **Attention Desk** if:
 
-$$\text{Composite Anomaly Score} \ge 35$$
+$$\text{Composite Score} \ge 35$$
 
 ---
 
@@ -120,7 +120,7 @@ graph TD
         Yahoo["NSE Live Feed (Yahoo Finance 2)"]
         Synthetic["Synthetic Indian Equities Mock"]
         RedisCache["Redis Stale Snapshot Cache"]
-        Breaker{"3-Tier Circuit Breaker"}
+        Breaker["3-Tier Circuit Breaker Guard"]
         Yahoo --> Breaker
         RedisCache -. Fallback .-> Breaker
         Synthetic -. Failover .-> Breaker
@@ -187,7 +187,7 @@ graph TD
   - SVG sparklines, 52-week range bars, volume surge multipliers, and search/filter inputs.
   - Tabbed switching across multiple watchlists (Tech, Banking, Auto) with creation/deletion drawers.
 - **Stock Deep-Dive Page (`/stock/[symbol]`):**
-  - Side-by-side comparison matrix: Session Baseline ($T_0$) vs. Live Market ($T_{\text{now}}$).
+  - Side-by-side comparison matrix: Session Baseline ($T_0$) vs. Live Market ($T_{\text{live}}$).
   - 40-candle interactive intraday SVG timeline with clickable nodes to inspect historical trigger points.
   - Fortified with `safeHistory` fallbacks to eliminate `Infinity`/`NaN` rendering bugs.
   - Comprehensive threshold audit log tracking all past alerts for that symbol.
@@ -209,8 +209,8 @@ graph TD
 ## 8. Non-Functional & Production Requirements
 
 1. **Latency & Performance:**
-   - Evaluator execution latency: $< 1\text{ms}$ per stock.
-   - SSE client broadcast: Every $2.5\text{ seconds}$ with sub-25ms round-trip delivery.
+   - Evaluator execution latency: < 1ms per stock.
+   - SSE client broadcast: Every 2.5 seconds with sub-25ms round-trip delivery.
 2. **Reliability & Fault Tolerance:**
    - 100% uptime through 3-tier circuit breaker: if Yahoo Finance rate-limits, server transparently serves cached or simulated data without throwing 500 errors.
    - Client automatically reconnects with exponential backoff on network disconnects.
