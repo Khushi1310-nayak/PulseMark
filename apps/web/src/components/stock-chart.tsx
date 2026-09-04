@@ -148,6 +148,31 @@ export function StockChart({
     setMousePos(null);
   };
 
+// Smooth Catmull-Rom to Cubic Bézier Spline for professional financial charts (TradingView / Apple Stocks)
+function buildSmoothSpline(pts: { x: number; y: number }[]): string {
+  if (pts.length === 0) return '';
+  if (pts.length === 1) return `M ${pts[0].x.toFixed(2)},${pts[0].y.toFixed(2)}`;
+  if (pts.length === 2) {
+    return `M ${pts[0].x.toFixed(2)},${pts[0].y.toFixed(2)} L ${pts[1].x.toFixed(2)},${pts[1].y.toFixed(2)}`;
+  }
+
+  let d = `M ${pts[0].x.toFixed(2)},${pts[0].y.toFixed(2)}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i === 0 ? 0 : i - 1];
+    const p1 = pts[i];
+    const p2 = pts[i + 1];
+    const p3 = pts[i + 2 >= pts.length ? pts.length - 1 : i + 2];
+
+    const cp1x = p1.x + (p2.x - p0.x) / 6;
+    const cp1y = p1.y + (p2.y - p0.y) / 6;
+    const cp2x = p2.x - (p3.x - p1.x) / 6;
+    const cp2y = p2.y - (p3.y - p1.y) / 6;
+
+    d += ` C ${cp1x.toFixed(2)},${cp1y.toFixed(2)} ${cp2x.toFixed(2)},${cp2y.toFixed(2)} ${p2.x.toFixed(2)},${p2.y.toFixed(2)}`;
+  }
+  return d;
+}
+
   // Generate SVG Path & Area Coordinates (pure line chart with glowing gradient fill)
   const { linePath, areaPath, points } = useMemo(() => {
     const pts = safeHistory.map((c, i) => {
@@ -156,8 +181,10 @@ export function StockChart({
       return { x: xPct, y: yPct, close: c.close, candle: c };
     });
 
-    const pathD = pts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(2)},${p.y.toFixed(2)}`).join(' ');
-    const areaD = `${pathD} L 100,100 L 0,100 Z`;
+    const pathD = buildSmoothSpline(pts);
+    const lastX = pts[pts.length - 1]?.x ?? 100;
+    const firstX = pts[0]?.x ?? 0;
+    const areaD = `${pathD} L ${lastX.toFixed(2)},100 L ${firstX.toFixed(2)},100 Z`;
 
     return { linePath: pathD, areaPath: areaD, points: pts };
   }, [safeHistory, maxPrice, priceRange]);
@@ -319,9 +346,9 @@ export function StockChart({
 
               {/* Clean Financial Stroke Path */}
               <motion.path
-                initial={{ pathLength: 0, opacity: 0 }}
-                animate={{ pathLength: 1, opacity: 1 }}
-                transition={{ duration: 0.6, ease: 'easeOut' }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.25 }}
                 d={linePath}
                 fill="none"
                 stroke={strokeColor}
@@ -331,41 +358,41 @@ export function StockChart({
                 vectorEffect="non-scaling-stroke"
               />
             </svg>
+
+            {/* Live Price Pulsing Dot (HTML overlay at latest point to maintain perfect circle geometry) */}
+            {points.length > 0 && (
+              <div
+                className="absolute pointer-events-none transform -translate-x-1/2 -translate-y-1/2 z-10"
+                style={{
+                  left: `${points[points.length - 1].x}%`,
+                  top: `${points[points.length - 1].y}%`,
+                }}
+              >
+                <div
+                  className="w-3.5 h-3.5 rounded-full animate-ping opacity-75"
+                  style={{ backgroundColor: strokeColor }}
+                />
+                <div
+                  className="w-2.5 h-2.5 rounded-full absolute inset-0 m-auto border-2 border-slate-950 shadow-md"
+                  style={{ backgroundColor: strokeColor }}
+                />
+              </div>
+            )}
+
+            {/* Interactive Cursor Tracking Dot (HTML overlay to guarantee 100% round dot) */}
+            {hoveredIndex !== null && activeHoverPoint && (
+              <div
+                className="absolute pointer-events-none transform -translate-x-1/2 -translate-y-1/2 z-20"
+                style={{
+                  left: `${activeHoverPoint.x}%`,
+                  top: `${activeHoverPoint.y}%`,
+                }}
+              >
+                <div className="w-4 h-4 rounded-full bg-white/20 animate-ping absolute inset-0 -m-1" />
+                <div className="w-3 h-3 rounded-full bg-white border-2 border-slate-950 shadow-lg" />
+              </div>
+            )}
           </div>
-
-          {/* Live Price Pulsing Dot (HTML overlay at latest point to maintain perfect circle geometry) */}
-          {points.length > 0 && (
-            <div
-              className="absolute pointer-events-none transform -translate-x-1/2 -translate-y-1/2 z-10"
-              style={{
-                left: `${points[points.length - 1].x}%`,
-                top: `${points[points.length - 1].y * (1 - bottomTimelineHeight / 320)}%`,
-              }}
-            >
-              <div
-                className="w-3 h-3 rounded-full animate-ping opacity-75"
-                style={{ backgroundColor: strokeColor }}
-              />
-              <div
-                className="w-2.5 h-2.5 rounded-full absolute inset-0 m-auto border-2 border-slate-950 shadow-md"
-                style={{ backgroundColor: strokeColor }}
-              />
-            </div>
-          )}
-
-          {/* Interactive Cursor Tracking Dot (HTML overlay to guarantee 100% round dot) */}
-          {hoveredIndex !== null && activeHoverPoint && (
-            <div
-              className="absolute pointer-events-none transform -translate-x-1/2 -translate-y-1/2 z-20"
-              style={{
-                left: `${activeHoverPoint.x}%`,
-                top: `${activeHoverPoint.y * (1 - bottomTimelineHeight / 320)}%`,
-              }}
-            >
-              <div className="w-4 h-4 rounded-full bg-white/20 animate-ping absolute inset-0 -m-1" />
-              <div className="w-3 h-3 rounded-full bg-white border-2 border-slate-950 shadow-lg" />
-            </div>
-          )}
 
           {/* Crosshair Cursor Hairlines */}
           {mousePos && hoveredIndex !== null && (
@@ -416,16 +443,31 @@ export function StockChart({
             </div>
           )}
 
-          {/* Current Live Price Pill on Y-Axis */}
+          {/* Current Live Price Pill on Y-Axis (dynamically tracked to real price coordinate) */}
           <div
-            className={`absolute right-1 bottom-2 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold shadow pointer-events-none z-20 ${
+            className={`absolute right-1 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold shadow-md pointer-events-none z-20 transform -translate-y-1/2 transition-all duration-300 ${
               isOverallPositive
                 ? 'bg-emerald-950 border border-emerald-500/60 text-emerald-300'
                 : 'bg-rose-950 border border-rose-500/60 text-rose-300'
             }`}
+            style={{
+              top: `${Math.max(6, Math.min(94, ((maxPrice - currentPrice) / priceRange) * 100))}%`,
+            }}
           >
             ₹{currentPrice.toFixed(1)}
           </div>
+
+          {/* Active Hover Price Pill on Y-Axis (aligned with cursor scrubbing) */}
+          {hoveredIndex !== null && activeHoverPoint && (
+            <div
+              className="absolute right-1 px-1.5 py-0.5 rounded bg-cyan-950 border border-cyan-400 text-cyan-200 text-[10px] font-mono font-bold shadow-xl pointer-events-none z-30 transform -translate-y-1/2"
+              style={{
+                top: `${Math.max(6, Math.min(94, activeHoverPoint.y))}%`,
+              }}
+            >
+              ₹{activeHoverPoint.close.toFixed(1)}
+            </div>
+          )}
         </div>
       </div>
 
