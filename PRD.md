@@ -1,4 +1,4 @@
-# 📋 Product Requirements Document (PRD): PulseMark
+# 📋 Product Requirements Document (PRD) - PulseMark
 
 **Product Name:** PulseMark  
 **Tagline:** Smart Market Watchlist & Event-Driven Temporal Change Engine  
@@ -18,13 +18,17 @@ PulseMark transforms static watchlist monitoring into an intelligent, proactive 
 
 ## 2. Problem Statement & User Pain Points
 
-### The Inherent Flaws of Traditional Stock Watchlists:
+### Inherent Flaws of Traditional Stock Watchlists
+
 1. **Naive Daily Percentage Change:**  
    Traditional tools display $\Delta P = \frac{P_{\text{current}} - P_{\text{prev\_close}}}{P_{\text{prev\_close}}}$. If a stock opened $+3\%$ at 9:15 AM and drifts sideways all day, it shows $+3\%$ green, masking the reality that nothing has happened for 4 hours. Conversely, if a stock was flat all morning and suddenly drops $-2\%$ in 10 minutes, the daily change shows only $-1\%$, failing to highlight the sudden flash move.
+
 2. **The "Cognitive Memory Tax":**  
    Traders must constantly remember: *"Where was Tata Motors when I stepped away for lunch?"* or *"Did Reliance cross its morning resistance while I was in a meeting?"* Human memory degrades across session intervals, leading to missed trades or delayed risk management.
+
 3. **Alert Fatigue & Noise Overload:**  
    Simple price threshold alerts either trigger incessantly on minor noise or fail to trigger when volume explodes without immediate price movement (a classic institutional accumulation pattern).
+
 4. **No Separation of Urgent vs. Normal Market Action:**  
    Traders are forced to visually scan 30–50 rows of identical-looking ticker tables to discover which asset actually demands immediate intervention.
 
@@ -32,7 +36,8 @@ PulseMark transforms static watchlist monitoring into an intelligent, proactive 
 
 ## 3. Goals & Success Criteria
 
-### Primary Product Goals:
+### Primary Product Goals
+
 - **Zero Mental Tracking:** Quantify market change relative to the user's last logout/departure timestamp ($T_0$), not an arbitrary midnight clock.
 - **Instant Attention Surfacing:** Surface equities exhibiting anomalous behavior into an elevated "Attention Desk" with plain-English rationales.
 - **Low-Latency Streaming:** Distribute real-time price updates with sub-millisecond local evaluation and under 50ms server-to-client propagation.
@@ -55,40 +60,52 @@ PulseMark transforms static watchlist monitoring into an intelligent, proactive 
 ## 5. Core Concepts & Mathematical Formulation
 
 ### 5.1 Temporal Session Baseline ($T_0$)
+
 When a user logs in, PulseMark identifies their previous session snapshot ($T_0$). If no prior session exists (or upon manual reset), $T_0$ defaults to the stock's market opening price and initial volume. When the user leaves, hides the browser tab, or logs out, `navigator.sendBeacon` automatically records an atomic exit snapshot containing:
+
 - Baseline Price ($P_{T_0}$)
 - Cumulative Volume ($V_{T_0}$)
 - Benchmark Intraday VWAP ($\text{VWAP}_{T_0}$)
 - Day High / Low extremes at departure
 
 ### 5.2 Multi-Factor Anomaly Scoring Algorithm
+
 Every incoming market tick is evaluated through a deterministic scoring function across four orthogonal dimensions:
 
 $$\text{Composite Score} = \min\left(100, S_{\text{price}} + S_{\text{volume}} + S_{\text{range}} + S_{\text{vwap}}\right)$$
 
 #### Factor 1: Price Delta vs. Session Baseline ($S_{\text{price}}$, Max 45 pts)
+
 $$\Delta P_{\%} = \left|\frac{P_{\text{current}} - P_{T_0}}{P_{T_0}}\right| \times 100$$
+
 - $\Delta P_{\%} \ge 3.0\% \implies 45\text{ pts}$ (Critical flash movement)
 - $\Delta P_{\%} \ge 1.5\% \implies 30\text{ pts}$ (Substantial shift)
 - $\Delta P_{\%} \ge 0.8\% \implies 15\text{ pts}$ (Moderate drift)
 - $\Delta P_{\%} < 0.8\% \implies 0\text{ pts}$
 
 #### Factor 2: Volume Surge vs. 30-Day Trailing Baseline ($S_{\text{volume}}$, Max 30 pts)
+
 $$\text{Ratio}_{\text{vol}} = \frac{V_{\text{current}}}{\bar{V}_{30\text{d}} / 6.25\text{ hours}}$$
+
 - $\text{Ratio}_{\text{vol}} \ge 3.0\times \implies 30\text{ pts}$ (Aggressive institutional presence)
 - $\text{Ratio}_{\text{vol}} \ge 2.0\times \implies 20\text{ pts}$ (Elevated trading activity)
 - $\text{Ratio}_{\text{vol}} \ge 1.5\times \implies 10\text{ pts}$ (Above-average participation)
 
 #### Factor 3: Intraday Session Range Breach ($S_{\text{range}}$, Max 15 pts)
+
 - High Breakout: $P_{\text{current}} > \text{DayHigh}_{T_0} \implies 15\text{ pts}$ (Resistance pierced)
 - Low Breakdown: $P_{\text{current}} < \text{DayLow}_{T_0} \implies 15\text{ pts}$ (Support breached)
 
 #### Factor 4: VWAP Divergence ($S_{\text{vwap}}$, Max 10 pts)
+
 $$\text{Div}_{\text{vwap}} = \left|\frac{P_{\text{current}} - \text{VWAP}}{\text{VWAP}}\right| \times 100$$
+
 - $\text{Div}_{\text{vwap}} \ge 1.5\% \implies 10\text{ pts}$ (Intraday price unanchored from mean)
 
-#### Decision Rule:
+#### Decision Rule
+
 An equity is automatically elevated to the **Attention Desk** if:
+
 $$\text{Composite Anomaly Score} \ge 35$$
 
 ---
@@ -144,11 +161,13 @@ graph TD
 ## 7. What Was Built (Comprehensive Implementation Inventory)
 
 ### 7.1 Shared Core Engine (`@pulsemark/shared`)
+
 - **Type-Safe Domain Contracts:** `StockTick`, `SessionSnapshot`, `MeaningfulChange`, `SensitivityConfig`, `StockHistoricalCandle`, `AuditLogEntry`.
 - **Pure Functional Evaluator:** Fully deterministic `evaluateStockAnomaly()` function that executes without DOM or Node dependencies, ensuring identical scoring on client and server.
 - **Sensitivity Thresholds:** Configurable thresholds supporting User, Aggressive, Moderate, and Conservative profiles.
 
 ### 7.2 High-Throughput API (`@pulsemark/api`)
+
 - **Fastify 4.x Server:** Low-overhead Node.js server binding to `0.0.0.0:3001` with optimized JSON serialization and CORS headers.
 - **3-Tier Feed Ingestion Service:**
   1. *Primary:* Yahoo Finance real-time quote batching for Indian NSE equities (`TATAMOTORS`, `INFY`, `TCS`, `RELIANCE`, etc.).
@@ -160,6 +179,7 @@ graph TD
 - **Historical Candlestick Engine:** Fetches 5-minute intraday chart bars from Yahoo Finance with fallback to structured synthetic candles.
 
 ### 7.3 Client Change Engine (`@pulsemark/web`)
+
 - **Next.js 14 App Router:** Server-side rendered shell with responsive client-side terminal grid and dark glassmorphic styling (`#070A0F`).
 - **Attention Desk:** Dynamic top deck displaying critical anomaly cards with color-coded severity badges, trigger rationale pills, and price delta statistics.
 - **High-Density Watchlist Matrix:**
