@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Activity, Terminal, Cpu, BookOpen } from 'lucide-react';
+import { getCleanApiBase } from '../lib/api';
 
 interface FooterProps {
   feedSource?: string;
@@ -20,8 +21,7 @@ export function Footer({ feedSource = 'LIVE_FEED', lastPingMs = 24 }: FooterProp
     const measurePing = async () => {
       try {
         const start = performance.now();
-        const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || '';
-        const cleanApiBase = rawApiUrl.replace(/\/api\/?$/, '').replace(/\/+$/, '');
+        const cleanApiBase = getCleanApiBase();
         const healthUrl = cleanApiBase ? `${cleanApiBase}/api/health` : '/api/health';
         const res = await fetch(healthUrl, { method: 'GET', cache: 'no-store' });
         if (res.ok && isMounted) {

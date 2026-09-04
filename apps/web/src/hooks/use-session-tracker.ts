@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { api } from '../lib/api';
+import { api, getCleanApiBase } from '../lib/api';
 
 export function useSessionTracker() {
   const isMountedRef = useRef(false);
@@ -25,8 +25,7 @@ export function useSessionTracker() {
     // in the browser networking thread even after page destruction, reliably committing the exit snapshot.
     const handleUnloadOrHide = () => {
       if (typeof navigator !== 'undefined' && typeof navigator.sendBeacon === 'function') {
-        const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || '';
-        const cleanApiBase = rawApiUrl.replace(/\/api\/?$/, '').replace(/\/+$/, '');
+        const cleanApiBase = getCleanApiBase();
         const url = cleanApiBase ? `${cleanApiBase}/api/session/snapshot` : '/api/session/snapshot';
         const payload = JSON.stringify({ timestamp: new Date().toISOString() });
         navigator.sendBeacon(url, payload);

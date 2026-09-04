@@ -6,12 +6,23 @@ import {
   StockDeepDiveResponse,
 } from '@pulsemark/shared';
 
-const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || '';
-const API_BASE = rawApiUrl.replace(/\/api\/?$/, '').replace(/\/+$/, '');
+export function getCleanApiBase(): string {
+  const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+  const cleanBase = rawApiUrl.replace(/\/api\/?$/, '').replace(/\/+$/, '');
+
+  // Mixed Content Protection: If page is loaded over HTTPS and target API is insecure HTTP,
+  // route through Next.js server-side HTTPS proxy rewrite (/api/...) to prevent browser blocking.
+  if (typeof window !== 'undefined' && window.location.protocol === 'https:' && cleanBase.startsWith('http://')) {
+    return '';
+  }
+
+  return cleanBase;
+}
 
 async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
   const normalizedUrl = url.startsWith('/') ? url : `/${url}`;
-  const targetUrl = API_BASE ? `${API_BASE}${normalizedUrl}` : normalizedUrl;
+  const apiBase = getCleanApiBase();
+  const targetUrl = apiBase ? `${apiBase}${normalizedUrl}` : normalizedUrl;
   const res = await fetch(targetUrl, {
     ...options,
     headers: {

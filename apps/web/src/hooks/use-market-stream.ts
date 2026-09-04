@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { StockTick, MeaningfulChange, SessionSnapshot } from '@pulsemark/shared';
+import { getCleanApiBase } from '../lib/api';
 
 export type ConnectionState = 'LIVE' | 'STALE' | 'RECONNECTING' | 'OFFLINE';
 
@@ -112,8 +113,7 @@ export function useMarketStream() {
       eventSourceRef.current.close();
     }
 
-    const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || '';
-    const cleanApiBase = rawApiUrl.replace(/\/api\/?$/, '').replace(/\/+$/, '');
+    const cleanApiBase = getCleanApiBase();
     const sseUrl = cleanApiBase ? `${cleanApiBase}/api/stream/ticks` : '/api/stream/ticks';
     const es = new EventSource(sseUrl);
     eventSourceRef.current = es;
@@ -164,8 +164,7 @@ export function useMarketStream() {
 
   const refreshSession = useCallback(async () => {
     try {
-      const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || '';
-      const cleanApiBase = rawApiUrl.replace(/\/api\/?$/, '').replace(/\/+$/, '');
+      const cleanApiBase = getCleanApiBase();
       const url = cleanApiBase ? `${cleanApiBase}/api/session/snapshot` : '/api/session/snapshot';
       const res = await fetch(url);
       if (res.ok) {
