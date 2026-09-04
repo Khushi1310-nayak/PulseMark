@@ -39,7 +39,7 @@ When a user returns after minutes, hours, or days, PulseMark computes multi-dime
 - ⚡ **Top Deck Attention Desk:** Automatically promotes equities with anomalous movements into a high-visibility deck with clear, natural-language rationale chips (`Volume: 3.5x normal`, `Broke Day's Resistance`, `Delta: +₹42 since logout`).
 - 📊 **High-Density Watchlist Matrix:** Tabular terminal view with real-time micro-flashing on tick up/down (Emerald `#10B981` / Rose `#F43F5E`), dynamic SVG sparklines, 52-week range bars, and instant search filtering.
 - 🛡️ **3-Tier Circuit Breaker Ingestion:** Fail-safe architecture featuring primary live Yahoo Finance NSE quote batching, secondary Redis stale caching with countdown flags, and tertiary synthetic simulation fallback.
-- 🔬 **Asset Deep Dive & Intraday Timeline (`/stock/[symbol]`):** Side-by-side session comparison matrix, interactive 40-candle intraday timeline with clickable anomaly event markers, and threshold audit logs.
+- 🔬 **Asset Deep Dive & Financial Spline Canvas (`/stock/[symbol]`):** Side-by-side session comparison matrix, continuous Catmull-Rom cubic spline trajectory with dual X (Timeline) & Y (Price) coordinate axes, interactive crosshair scrubbing, baseline $T_0$ reference guideline, and threshold audit logs.
 - 🎛️ **Interactive Anomaly Heuristic Playground (`/docs`):** Real-time quantitative simulation sandbox with live sliders and instant one-click scenario presets (*Institutional Squeeze, Flash Breakdown, Quiet Session*).
 - 🏛️ **Architecture Canvas & Interactive ADRs (`/docs`):** Click-to-inspect 4-stage pipeline visualizer and Architectural Decision Records detailing SSE vs. WebSockets, in-memory buffers, and beacon persistence.
 - 🧪 **Evaluator Chaos Studio (`?demo=evaluator`):** Built-in judge testing drawer enabling instant session time-travel (15m, 2h, 1d), volatility shocks ($\pm 4\%$), and simulated network dropouts.
@@ -111,7 +111,7 @@ High-performance, tabular equity deck supporting multiple watchlists (*Tech & He
 
 Comprehensive single-stock diagnostic page containing:
 - **Session Baseline Matrix:** Side-by-side audit of price, volume, VWAP, and spread between your logout time ($T_0$) and current market ($T_{\text{now}}$).
-- **Intraday SVG Candlestick Timeline:** 40 five-minute candles with clickable interactive nodes and automated anomaly ping markers.
+- **Continuous Financial Spline Canvas:** Catmull-Rom cubic Bézier curve tracing every intraday 5-minute price tick, real coordinate axes with dynamic Y-axis live price pill tracking, floating $T_0$ reference guideline, and subtle volume distribution histogram.
 - **Threshold Audit Log:** Historical ledger of every anomaly trigger and rule firing recorded during your session.
 
 ## 🎛️ Quantitative Anomaly Playground (`/docs`)
@@ -186,9 +186,13 @@ All API routes are served under `/api` and feature automatic URL normalization.
 
 ![Main Terminal Dashboard](assets/screenshots/dashboard_overview.png)
 
-## 🔬 Single Asset Deep-Dive & 40-Candle Intraday Timeline
+## 🔬 Single Asset Deep-Dive & Continuous Financial Spline Canvas
 
 ![Stock Deep Dive](assets/screenshots/stock_deep_dive.png)
+
+## 🧪 Evaluator Chaos Studio & Session Time Travel
+
+![Evaluator Studio](assets/screenshots/evaluator_studio.png)
 
 ## 🎛️ Quantitative Anomaly Heuristic Playground
 
