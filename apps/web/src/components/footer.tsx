@@ -50,7 +50,7 @@ export function Footer({ feedSource = 'LIVE_FEED', lastPingMs = 24 }: FooterProp
   const getSourceBadge = () => {
     switch (feedSource) {
       case 'LIVE_FEED':
-        return <span className="text-emerald-400 font-mono">● LIVE (NSE / Yahoo)</span>;
+        return <span className="text-emerald-400 font-mono">● LIVE</span>;
       case 'STALE_REDIS_CACHE':
       case 'STALE_CACHE':
         return <span className="text-amber-400 font-mono">▲ CACHED (Redis Fallback)</span>;
@@ -58,7 +58,7 @@ export function Footer({ feedSource = 'LIVE_FEED', lastPingMs = 24 }: FooterProp
       case 'SYNTHETIC_MOCK':
         return <span className="text-cyan-400 font-mono">■ SIMULATED</span>;
       default:
-        return <span className="text-emerald-400 font-mono">● LIVE (NSE / Yahoo)</span>;
+        return <span className="text-emerald-400 font-mono">● LIVE</span>;
     }
   };
 
