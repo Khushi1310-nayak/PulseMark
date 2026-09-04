@@ -21,6 +21,7 @@ import {
   Sparkles,
   Info,
 } from 'lucide-react';
+import { formatBenchmarkTimeLabel } from '../lib/utils';
 
 function DashboardContent() {
   const searchParams = useSearchParams();
@@ -128,19 +129,9 @@ function DashboardContent() {
                 <span className="text-xs font-mono font-bold text-slate-200 uppercase tracking-wide">
                   Active Session Baseline (T₀)
                 </span>
-                {snapshot?.benchmarkLabel ? (
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-medium">
-                    {snapshot.benchmarkLabel}
-                  </span>
-                ) : snapshot?.isFirstSession ? (
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-medium">
-                    09:15 AM Market Open (First Session Today)
-                  </span>
-                ) : (
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300">
-                    Today at 09:15 AM (Market Open)
-                  </span>
-                )}
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-medium">
+                  {formatBenchmarkTimeLabel(snapshot)}
+                </span>
               </div>
               <p className="text-[11px] text-slate-400 mt-0.5">
                 Every price delta, volume surge, and range breach below is benchmarked against your prior session state.
@@ -163,7 +154,7 @@ function DashboardContent() {
         <div id="attention-desk">
           <AttentionDesk
             anomalies={attentionDesk}
-            benchmarkLabel={snapshot?.benchmarkLabel}
+            benchmarkLabel={formatBenchmarkTimeLabel(snapshot)}
             onOpenEvaluator={() => setIsEvaluatorOpen(true)}
           />
         </div>

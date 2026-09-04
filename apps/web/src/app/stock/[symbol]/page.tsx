@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { StockDeepDiveResponse, StockHistoricalCandle } from '@pulsemark/shared';
 import { api } from '../../../lib/api';
-import { formatINR, formatPercent, formatVolume, formatTime } from '../../../lib/utils';
+import { formatINR, formatPercent, formatVolume, formatTime, formatBenchmarkTimeLabel } from '../../../lib/utils';
+import { StockChart } from '../../../components/stock-chart';
 import {
   ArrowLeft,
   Activity,
@@ -162,8 +163,11 @@ export default function StockDeepDivePage() {
                 <span className="text-xs font-mono font-bold text-slate-200">
                   TEMPORAL DELTA ANALYSIS (vs Session Baseline)
                 </span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300">
-                  {data.benchmarkLabel}
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-medium">
+                  {formatBenchmarkTimeLabel({
+                    benchmarkTime: data.benchmarkTime,
+                    benchmarkLabel: data.benchmarkLabel,
+                  })}
                 </span>
               </div>
               <p className="text-xs text-slate-400 mt-1">
@@ -271,100 +275,19 @@ export default function StockDeepDivePage() {
           </div>
         </div>
 
-        {/* Interactive Intraday Timeline & Anomaly Marker Chart */}
-        <div className="rounded-xl border border-border bg-surface p-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <BarChart3 className="w-4 h-4 text-emerald-400" />
-              <h3 className="font-mono font-bold text-sm text-slate-100 uppercase tracking-wide">
-                Intraday Price Trajectory & Event Marker
-              </h3>
-            </div>
-            {selectedCandle && (
-              <div className="flex items-center gap-3 text-xs font-mono text-slate-300">
-                <span>Time: {formatTime(selectedCandle.timestamp)}</span>
-                <span>Price: <strong>₹{selectedCandle.close.toFixed(2)}</strong></span>
-                <span>Vol: {formatVolume(selectedCandle.volume)}</span>
-                {selectedCandle.isAnomalyPoint && (
-                  <span className="px-2 py-0.5 rounded bg-rose-950/80 text-rose-300 border border-rose-500/30">
-                    ⚡ Trigger: {selectedCandle.anomalyReason}
-                  </span>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* SVG Intraday Chart */}
-          <div className="h-64 w-full bg-slate-950/80 rounded-lg p-4 relative border border-slate-800/80 overflow-hidden flex items-end">
-            <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="w-full h-full overflow-visible">
-              {/* Horizontal Grid lines */}
-              {[25, 50, 75].map((pct, i) => (
-                <line
-                  key={i}
-                  x1="0"
-                  y1={pct}
-                  x2="100"
-                  y2={pct}
-                  stroke="rgba(30, 41, 59, 0.4)"
-                  strokeDasharray="4 4"
-                  vectorEffect="non-scaling-stroke"
-                />
-              ))}
-
-              {/* Candles / Path */}
-              {safeHistory.map((candle, idx) => {
-                const xPct = (idx / (safeHistory.length - 1 || 1)) * 100;
-                const yPct = 100 - ((candle.close - minPrice) / priceRange) * 100;
-                const isSelected = selectedCandle?.timestamp === candle.timestamp;
-
-                return (
-                  <g key={idx} className="cursor-pointer" onClick={() => setSelectedCandle(candle)}>
-                    {candle.isAnomalyPoint && (
-                      <circle
-                        cx={xPct}
-                        cy={yPct}
-                        r="4"
-                        fill="rgba(244, 63, 94, 0.4)"
-                        stroke="#F43F5E"
-                        strokeWidth="1.5"
-                        vectorEffect="non-scaling-stroke"
-                        className="animate-ping"
-                      />
-                    )}
-
-                    <circle
-                      cx={xPct}
-                      cy={yPct}
-                      r={candle.isAnomalyPoint ? '3.5' : isSelected ? '3' : '1.8'}
-                      fill={candle.isAnomalyPoint ? '#F43F5E' : isSelected ? '#10B981' : '#64748B'}
-                      stroke={isSelected ? '#FFFFFF' : 'none'}
-                      strokeWidth="1"
-                      vectorEffect="non-scaling-stroke"
-                    />
-                  </g>
-                );
-              })}
-
-              {/* Connect line */}
-              <path
-                d={`M ${safeHistory
-                  .map((c, i) => {
-                    const x = (i / (safeHistory.length - 1 || 1)) * 100;
-                    const y = 100 - ((c.close - minPrice) / priceRange) * 100;
-                    return `${x.toFixed(2)},${y.toFixed(2)}`;
-                  })
-                  .join(' L ')}`}
-                fill="none"
-                stroke={isPositiveDelta ? '#10B981' : '#F43F5E'}
-                strokeWidth="2"
-                vectorEffect="non-scaling-stroke"
-              />
-            </svg>
-          </div>
-          <p className="text-[11px] text-slate-500 font-mono text-center">
-            Click on any historical node above to inspect exact snapshot metrics and trigger events.
-          </p>
-        </div>
+        {/* Interactive Real Financial Intraday Chart Component */}
+        <StockChart
+          symbol={symbol}
+          history={safeHistory}
+          benchmark={benchmark}
+          currentPrice={current.price}
+          benchmarkLabel={formatBenchmarkTimeLabel({
+            benchmarkTime: data.benchmarkTime,
+            benchmarkLabel: data.benchmarkLabel,
+          })}
+          onSelectCandle={(candle) => setSelectedCandle(candle)}
+          selectedCandle={selectedCandle}
+        />
 
         {/* Threshold Audit Log */}
         <div className="rounded-xl border border-border bg-surface p-6 space-y-4">

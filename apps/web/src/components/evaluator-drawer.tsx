@@ -31,10 +31,11 @@ interface EvaluatorDrawerProps {
 
 const TIME_TRAVEL_PRESETS = [
   { label: '15 Minutes Ago', minutes: 15, desc: 'Simulate brief absence / short coffee break' },
-  { label: '2 Hours Ago (09:15 AM)', minutes: 120, desc: 'Market open baseline session' },
+  { label: '2 Hours Ago', minutes: 120, desc: 'Morning session baseline comparison' },
   { label: '4 Hours Ago', minutes: 240, desc: 'Mid-day check-in baseline' },
-  { label: '1 Day Ago (Yesterday Close)', minutes: 1440, desc: 'Overnight session delta comparison' },
-  { label: '3 Days Ago (Post-Weekend)', minutes: 4320, desc: 'Multi-day absence comparison' },
+  { label: '1 Day Ago', minutes: 1440, desc: 'Prior day closing baseline comparison' },
+  { label: '3 Days Ago', minutes: 4320, desc: 'Multi-day absence comparison' },
+  { label: '1 Week Ago', minutes: 10080, desc: 'Full week swing trading baseline comparison' },
 ];
 
 const PRESET_ANOMALIES = [
