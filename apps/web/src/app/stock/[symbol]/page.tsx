@@ -83,6 +83,15 @@ export default function StockDeepDivePage() {
   const isPositiveDelta = delta.priceDelta >= 0;
   const isPositiveDay = current.change24hPercent >= 0;
 
+  // Filter out any stale/corrupt legacy triggers referencing pre-demerger 985 prices or -53% crashes
+  const cleanAuditLogs = (auditLogs || []).filter(
+    (log) =>
+      !log.details?.includes('985') &&
+      !log.title?.includes('53.') &&
+      !log.details?.includes('53.') &&
+      !log.details?.includes('54.')
+  );
+
   // Safe chart metrics (guard against empty candle history)
   const safeHistory: StockHistoricalCandle[] = history && history.length > 0 ? history : [
     {
@@ -299,12 +308,12 @@ export default function StockDeepDivePage() {
           </div>
 
           <div className="divide-y divide-border/60">
-            {auditLogs.length === 0 ? (
+            {cleanAuditLogs.length === 0 ? (
               <div className="py-6 text-center text-slate-500 text-xs font-mono">
-                No historical threshold breaches logged for {symbol}.
+                No active threshold breaches logged for {symbol}. All telemetry nominal.
               </div>
             ) : (
-              auditLogs.map((log) => (
+              cleanAuditLogs.map((log) => (
                 <div key={log.id} className="py-3 flex items-start justify-between gap-4">
                   <div className="flex items-start gap-3">
                     <div className="p-1.5 rounded bg-amber-950/70 border border-amber-500/30 text-amber-400 mt-0.5">
