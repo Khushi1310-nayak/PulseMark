@@ -29,19 +29,9 @@ export class DeltaCalculationService {
    */
   public createDefaultMarketOpenSnapshot(userId: string = DEFAULT_USER_ID): SessionSnapshot {
     const now = new Date();
-    const marketOpen = new Date(now);
-    marketOpen.setHours(9, 15, 0, 0);
-
     const isWeekend = now.getDay() === 0 || now.getDay() === 6;
     const marketStatus = isWeekend ? 'WEEKEND' : 'OPEN';
-
-    // Calculate time elapsed label
-    const diffMs = Math.max(0, now.getTime() - marketOpen.getTime());
-    const hours = Math.floor(diffMs / (1000 * 60 * 60));
-    const mins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-    const label = isWeekend
-      ? 'Market Closed • Benchmarked against Friday Close'
-      : 'First session today — benchmarking against 09:15 AM Market Open';
+    const label = `Today at ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} (Just now)`;
 
     const knownTicks = feedService.getAllKnownTicks();
     const allTicks = knownTicks.length > 0 ? knownTicks : mockStockService.getAllTicks();
@@ -52,7 +42,7 @@ export class DeltaCalculationService {
       prices[tick.symbol] = {
         price: benchmarkPrice,
         volume: Math.floor(tick.avgVolume30d / 20),
-        timestamp: marketOpen.toISOString(),
+        timestamp: now.toISOString(),
         dayHigh: tick.dayHigh > 0 ? tick.dayHigh : benchmarkPrice,
         dayLow: tick.dayLow > 0 ? tick.dayLow : benchmarkPrice,
         vwap: tick.vwap > 0 ? tick.vwap : benchmarkPrice,
@@ -63,7 +53,7 @@ export class DeltaCalculationService {
     return {
       sessionId: `sess-${Date.now()}`,
       userId,
-      benchmarkTime: marketOpen.toISOString(),
+      benchmarkTime: now.toISOString(),
       benchmarkLabel: label,
       marketStatus,
       prices,

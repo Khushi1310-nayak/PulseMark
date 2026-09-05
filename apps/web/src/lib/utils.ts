@@ -49,11 +49,14 @@ export function formatTime(isoString: string): string {
 export function formatBenchmarkTimeLabel(
   snapshot: { benchmarkTime?: string; benchmarkLabel?: string; isFirstSession?: boolean } | null | undefined
 ): string {
-  if (!snapshot) return 'Today at 09:15 AM (Market Open)';
+  const now = new Date();
+  const currentLocalTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+  if (!snapshot) return `Today at ${currentLocalTime} (Just now)`;
 
   const label = snapshot.benchmarkLabel || '';
 
-  // Clean relative simulated labels like "15 Minutes Ago", "2 Hours Ago", "4 Hours Ago", "1 Day Ago", "3 Days Ago", "1 Week Ago"
+  // 1. Clean relative simulated labels like "15 Minutes Ago", "2 Hours Ago", "4 Hours Ago", "1 Day Ago", "3 Days Ago", "1 Week Ago"
   if (/(\b\d+\s+(minute|minutes|hour|hours|day|days|week|weeks)\s+ago\b)/i.test(label)) {
     const match = label.match(/(\d+\s+(?:minute|minutes|hour|hours|day|days|week|weeks)\s+ago)/i);
     if (match) {
@@ -65,28 +68,35 @@ export function formatBenchmarkTimeLabel(
     return label.replace(/^Simulated:\s*/i, '');
   }
 
-  // If label says "First session today" or isFirstSession flag is true
-  if (snapshot.isFirstSession || label.toLowerCase().includes('first session')) {
-    return '09:15 AM Market Open (First Session Today)';
+  // 2. If explicitly marked "Just now" or default session
+  if (label.toLowerCase().includes('just now')) {
+    return `Today at ${currentLocalTime} (Just now)`;
   }
 
-  // If the snapshot has an actual benchmark timestamp (ISO string), format in the client's local timezone!
+  // 3. Inspect benchmark timestamp
   if (snapshot.benchmarkTime) {
     const date = new Date(snapshot.benchmarkTime);
     if (!isNaN(date.getTime())) {
+      // Guard against future timestamps (e.g. server UTC timezone mismatch resulting in 02:45 PM)
+      if (date.getTime() > now.getTime()) {
+        return `Today at ${currentLocalTime} (Just now)`;
+      }
+
+      const diffMinutes = Math.abs(now.getTime() - date.getTime()) / (1000 * 60);
+      if (diffMinutes < 5) {
+        return `Today at ${currentLocalTime} (Just now)`;
+      }
+
       const localTime = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      const now = new Date();
       const isToday = now.toDateString() === date.toDateString();
       const dayPrefix = isToday ? 'Today' : date.toLocaleDateString([], { month: 'short', day: 'numeric' });
 
-      // If taken within the last 5 minutes or explicitly marked "Just now"
-      const diffMinutes = Math.abs(now.getTime() - date.getTime()) / (1000 * 60);
-      if (label.toLowerCase().includes('just now') || diffMinutes < 5) {
-        return `${dayPrefix} at ${localTime} (Just now)`;
+      if (diffMinutes < 60) {
+        return `${dayPrefix} at ${localTime} (${Math.round(diffMinutes)}m ago)`;
       }
       return `${dayPrefix} at ${localTime}`;
     }
   }
 
-  return label || 'Today at 09:15 AM (Market Open)';
+  return `Today at ${currentLocalTime} (Just now)`;
 }
