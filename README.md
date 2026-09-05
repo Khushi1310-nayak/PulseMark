@@ -42,7 +42,7 @@ When a user returns after minutes, hours, or days, PulseMark computes multi-dime
 - 🔬 **Asset Deep Dive & Financial Spline Canvas (`/stock/[symbol]`):** Side-by-side session comparison matrix, continuous Catmull-Rom cubic spline trajectory with dual X (Timeline) & Y (Price) coordinate axes, interactive crosshair scrubbing, baseline $T_0$ reference guideline, and threshold audit logs.
 - 🎛️ **Interactive Anomaly Heuristic Playground (`/docs`):** Real-time quantitative simulation sandbox with live sliders and instant one-click scenario presets (*Institutional Squeeze, Flash Breakdown, Quiet Session*).
 - 🏛️ **Architecture Canvas & Interactive ADRs (`/docs`):** Click-to-inspect 4-stage pipeline visualizer and Architectural Decision Records detailing SSE vs. WebSockets, in-memory buffers, and beacon persistence.
-- 🧪 **Evaluator Chaos Studio (`?demo=evaluator`):** Built-in judge testing drawer enabling instant session time-travel (15m, 2h, 1d), volatility shocks ($\pm 4\%$), and simulated network dropouts.
+- 🧪 **Evaluator & Scenario Simulator (`?demo=evaluator`):** Built-in scenario testing drawer enabling instant session time-travel (15m, 2h, 1d), volatility shocks ($\pm 4\%$), and simulated network dropouts.
 - 💾 **Zero-Loss Beacon Persistence:** Uses `navigator.sendBeacon` to reliably commit exit snapshots to the server on browser close or tab switch without blocking the main UI thread.
 - 🚀 **Zero-Config In-Memory Default:** Boots instantly without requiring PostgreSQL or Redis containers, while seamlessly upgrading to Prisma PostgreSQL and Redis when connection strings are provided.
 
@@ -123,9 +123,9 @@ An interactive mathematical sandbox where users and evaluators can adjust slider
 - Intraday VWAP Divergence ($> 1.5\%$)
 - Quick Scenario Presets: *Default (+2.4% Surge)*, *Institutional Squeeze (+4.2%)*, *Flash Breakdown (-3.8%)*, and *Quiet Session (0.4%)*.
 
-## 🧪 Evaluator & Chaos Studio (`?demo=evaluator`)
+## 🧪 Evaluator & Scenario Simulator (`?demo=evaluator`)
 
-A purpose-built testing drawer for judges and auditors to stress-test PulseMark:
+A purpose-built scenario testing drawer to stress-test PulseMark across diverse market conditions:
 - **Session Time-Travel:** Simulate logging back into the terminal after 15 minutes, 1 hour, 4 hours, 1 day, or 3 days.
 - **Volatility Injection:** Instantly shock any stock with artificial price moves ($\pm 4\%$) or aggressive volume bursts ($3.5\times$).
 - **Network Chaos:** Toggle simulated exchange connection drops to verify that the 3-tier circuit breaker falls back to cached snapshots without throwing errors.

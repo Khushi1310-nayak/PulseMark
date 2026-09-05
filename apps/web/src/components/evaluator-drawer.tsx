@@ -235,10 +235,10 @@ export function EvaluatorDrawer({
                 </div>
                 <div>
                   <h2 className="text-base font-bold text-slate-100 font-mono tracking-wide uppercase">
-                    Judge Evaluator & Simulator
+                    Evaluator & Simulator
                   </h2>
                   <p className="text-xs text-slate-400 mt-0.5">
-                    Test multi-temporal baseline diffing, volatility shocks, and network resiliency.
+                    Test multi-temporal baseline diffing, volatility scenarios, and network resiliency.
                   </p>
                 </div>
               </div>

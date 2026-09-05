@@ -172,7 +172,7 @@ export class FeedIngestionService {
    * 3. Tertiary: In-memory fallback (`mockStockService`) if external API throws or rate-limits
    */
   public async getLatestTicks(): Promise<{ ticks: StockTick[]; source: FeedSource }> {
-    // 1. Check if simulated network drop is active (Judge Evaluator Chaos Mode)
+    // 1. Check if simulated network drop is active (Scenario Simulator Mode)
     if (this.status.simulatedNetworkDrop) {
       this.status.source = 'STALE_REDIS_CACHE';
       this.status.provider = 'Redis Stale Cache (Circuit Breaker Active)';

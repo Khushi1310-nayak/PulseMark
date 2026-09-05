@@ -126,7 +126,7 @@ export class DeltaCalculationService {
   }
 
   /**
-   * Simulates Session Time Travel (Judge Evaluator Control)
+   * Simulates Session Time Travel (Market Evaluator & Scenario Control)
    */
   public simulateTimeTravel(userId: string, minutesAgo: number, customLabel?: string): SessionSnapshot {
     const now = new Date();

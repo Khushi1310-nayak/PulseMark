@@ -229,7 +229,7 @@ export class MockStockService {
   }
 
   /**
-   * Judge evaluator control: force sudden price shock / volume spike / support breach
+   * Scenario simulation control: force sudden price shock / volume spike / support breach
    */
   public injectVolatility(
     symbol: string,
