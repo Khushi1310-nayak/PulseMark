@@ -203,14 +203,31 @@ class MemoryStore {
 
   // Audit Logs
   public addAuditLog(entry: Omit<AuditLogEntry, 'id'>): AuditLogEntry {
-    // Sanity filter: Ignore corrupt legacy triggers referencing stale 984/985 pre-demerger price or -53% deltas
-    if (
+    // Sanity filter: Ignore corrupt legacy triggers referencing stale pre-demerger/pre-split prices or impossible drops (> 20%)
+    const isExtremeArtificialDrop =
+      /(-[2-9]\d+(\.\d+)?%)/.test(entry.title) ||
+      /(-[2-9]\d+(\.\d+)?%)/.test(entry.details) ||
+      entry.title.includes('53.') ||
+      entry.title.includes('54.') ||
+      entry.details.includes('53.') ||
+      entry.details.includes('54.');
+
+    const isLegacyStaleBasePrice =
       entry.details.includes('985') ||
       entry.details.includes('984') ||
-      entry.title.includes('53.') ||
-      entry.details.includes('53.') ||
-      entry.details.includes('54.')
-    ) {
+      entry.details.includes('2894') ||
+      entry.details.includes('4108') ||
+      entry.details.includes('1465') ||
+      entry.details.includes('1482') ||
+      entry.details.includes('1780');
+
+    const isImpossibleDelta =
+      entry.deltaAtTrigger !== undefined &&
+      entry.priceAtTrigger !== undefined &&
+      entry.priceAtTrigger > 0 &&
+      Math.abs(entry.deltaAtTrigger) / entry.priceAtTrigger > 0.20;
+
+    if (isExtremeArtificialDrop || isLegacyStaleBasePrice || isImpossibleDelta) {
       return { id: `noop-${Date.now()}`, ...entry };
     }
 
@@ -226,14 +243,33 @@ class MemoryStore {
   }
 
   public getAuditLogs(symbol?: string): AuditLogEntry[] {
-    let logs = this.auditLogs.filter(
-      (l) =>
-        !l.details.includes('985') &&
-        !l.details.includes('984') &&
-        !l.title.includes('53.') &&
-        !l.details.includes('53.') &&
-        !l.details.includes('54.')
-    );
+    let logs = this.auditLogs.filter((l) => {
+      const isExtremeArtificialDrop =
+        /(-[2-9]\d+(\.\d+)?%)/.test(l.title) ||
+        /(-[2-9]\d+(\.\d+)?%)/.test(l.details) ||
+        l.title.includes('53.') ||
+        l.title.includes('54.') ||
+        l.details.includes('53.') ||
+        l.details.includes('54.');
+
+      const isLegacyStaleBasePrice =
+        l.details.includes('985') ||
+        l.details.includes('984') ||
+        l.details.includes('2894') ||
+        l.details.includes('4108') ||
+        l.details.includes('1465') ||
+        l.details.includes('1482') ||
+        l.details.includes('1780');
+
+      const isImpossibleDelta =
+        l.deltaAtTrigger !== undefined &&
+        l.priceAtTrigger !== undefined &&
+        l.priceAtTrigger > 0 &&
+        Math.abs(l.deltaAtTrigger) / l.priceAtTrigger > 0.20;
+
+      return !isExtremeArtificialDrop && !isLegacyStaleBasePrice && !isImpossibleDelta;
+    });
+
     if (symbol) {
       logs = logs.filter((l) => l.symbol === symbol);
     }

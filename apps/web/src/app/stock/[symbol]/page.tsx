@@ -83,15 +83,45 @@ export default function StockDeepDivePage() {
   const isPositiveDelta = delta.priceDelta >= 0;
   const isPositiveDay = current.change24hPercent >= 0;
 
-  // Filter out any stale/corrupt legacy triggers referencing pre-demerger 984/985 prices or -53% crashes
-  const cleanAuditLogs = (auditLogs || []).filter(
-    (log) =>
-      !log.details?.includes('985') &&
-      !log.details?.includes('984') &&
-      !log.title?.includes('53.') &&
-      !log.details?.includes('53.') &&
-      !log.details?.includes('54.')
-  );
+  // Universal sanity filter: remove artificial crashes caused by legacy pre-demerger/pre-split baseline mismatches across all companies
+  const cleanAuditLogs = (auditLogs || []).filter((log) => {
+    // Drop impossible large-cap plunge percentages (> 20%)
+    if (
+      /(-[2-9]\d+(\.\d+)?%)/.test(log.title) ||
+      /(-[2-9]\d+(\.\d+)?%)/.test(log.details) ||
+      log.title.includes('53.') ||
+      log.title.includes('54.') ||
+      log.details.includes('53.') ||
+      log.details.includes('54.')
+    ) {
+      return false;
+    }
+
+    // Drop stale pre-split / pre-demerger price references
+    if (
+      log.details.includes('985') ||
+      log.details.includes('984') ||
+      log.details.includes('2894') ||
+      log.details.includes('4108') ||
+      log.details.includes('1465') ||
+      log.details.includes('1482') ||
+      log.details.includes('1780')
+    ) {
+      return false;
+    }
+
+    // Drop impossible delta ratios relative to price
+    if (
+      log.deltaAtTrigger !== undefined &&
+      log.priceAtTrigger !== undefined &&
+      log.priceAtTrigger > 0 &&
+      Math.abs(log.deltaAtTrigger) / log.priceAtTrigger > 0.20
+    ) {
+      return false;
+    }
+
+    return true;
+  });
 
   // Safe chart metrics (guard against empty candle history)
   const safeHistory: StockHistoricalCandle[] = history && history.length > 0 ? history : [
