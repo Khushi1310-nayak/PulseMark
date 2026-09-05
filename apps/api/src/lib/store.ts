@@ -203,9 +203,10 @@ class MemoryStore {
 
   // Audit Logs
   public addAuditLog(entry: Omit<AuditLogEntry, 'id'>): AuditLogEntry {
-    // Sanity filter: Ignore corrupt legacy triggers referencing stale 985 pre-demerger price or -53% deltas
+    // Sanity filter: Ignore corrupt legacy triggers referencing stale 984/985 pre-demerger price or -53% deltas
     if (
       entry.details.includes('985') ||
+      entry.details.includes('984') ||
       entry.title.includes('53.') ||
       entry.details.includes('53.') ||
       entry.details.includes('54.')
@@ -228,6 +229,7 @@ class MemoryStore {
     let logs = this.auditLogs.filter(
       (l) =>
         !l.details.includes('985') &&
+        !l.details.includes('984') &&
         !l.title.includes('53.') &&
         !l.details.includes('53.') &&
         !l.details.includes('54.')

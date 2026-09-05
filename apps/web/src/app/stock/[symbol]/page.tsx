@@ -83,10 +83,11 @@ export default function StockDeepDivePage() {
   const isPositiveDelta = delta.priceDelta >= 0;
   const isPositiveDay = current.change24hPercent >= 0;
 
-  // Filter out any stale/corrupt legacy triggers referencing pre-demerger 985 prices or -53% crashes
+  // Filter out any stale/corrupt legacy triggers referencing pre-demerger 984/985 prices or -53% crashes
   const cleanAuditLogs = (auditLogs || []).filter(
     (log) =>
       !log.details?.includes('985') &&
+      !log.details?.includes('984') &&
       !log.title?.includes('53.') &&
       !log.details?.includes('53.') &&
       !log.details?.includes('54.')
