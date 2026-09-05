@@ -131,134 +131,145 @@ export function AttentionDesk({ anomalies, benchmarkLabel, onOpenEvaluator }: At
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         <AnimatePresence mode="popLayout">
           {displayedAnomalies.map((item) => {
-            const isPositive = item.priceDelta >= 0;
-            const isCritical = item.anomalyScore >= 75;
-            const isHigh = item.anomalyScore >= 50 && item.anomalyScore < 75;
-            const tags = getFormattedReasons(item);
+              const displayDeltaPercent =
+                Math.abs(item.priceDeltaPercent) > 25
+                  ? item.dayChangePercent
+                  : (item.priceDeltaPercent !== 0 ? item.priceDeltaPercent : item.dayChangePercent);
 
-            return (
-              <motion.div
-                key={item.symbol}
-                layout
-                initial={{ opacity: 0, scale: 0.96, y: 12 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.96, y: -12 }}
-                transition={{ duration: 0.25, ease: 'easeOut' }}
-                whileHover={{ y: -4, transition: { duration: 0.2 } }}
-                className={`group relative rounded-2xl border bg-slate-900/80 backdrop-blur-xl p-5 transition-all duration-300 shadow-xl flex flex-col justify-between overflow-hidden ${
-                  isCritical
-                    ? 'border-rose-500/40 hover:border-rose-500/70 shadow-rose-950/20'
-                    : isHigh
-                    ? 'border-amber-500/40 hover:border-amber-500/70 shadow-amber-950/20'
-                    : 'border-slate-800/80 hover:border-slate-700 shadow-slate-950/30'
-                }`}
-              >
-                {/* Decorative Top Gradient Stripe */}
-                <div
-                  className={`absolute top-0 left-0 right-0 h-[2px] ${
-                    isPositive
-                      ? 'bg-gradient-to-r from-emerald-500 via-teal-400 to-transparent'
-                      : 'bg-gradient-to-r from-rose-500 via-amber-400 to-transparent'
+              const displayPriceDelta =
+                Math.abs(item.priceDeltaPercent) > 25
+                  ? Number((item.currentPrice * (item.dayChangePercent / 100)).toFixed(2))
+                  : item.priceDelta;
+
+              const isPositive = displayDeltaPercent >= 0;
+              const isCritical = item.anomalyScore >= 75;
+              const isHigh = item.anomalyScore >= 50 && item.anomalyScore < 75;
+              const tags = getFormattedReasons(item);
+
+              return (
+                <motion.div
+                  key={item.symbol}
+                  layout
+                  initial={{ opacity: 0, scale: 0.96, y: 12 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.96, y: -12 }}
+                  transition={{ duration: 0.25, ease: 'easeOut' }}
+                  whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                  className={`group relative rounded-2xl border bg-slate-900/80 backdrop-blur-xl p-5 transition-all duration-300 shadow-xl flex flex-col justify-between overflow-hidden ${
+                    isCritical
+                      ? 'border-rose-500/40 hover:border-rose-500/70 shadow-rose-950/20'
+                      : isHigh
+                      ? 'border-amber-500/40 hover:border-amber-500/70 shadow-amber-950/20'
+                      : 'border-slate-800/80 hover:border-slate-700 shadow-slate-950/30'
                   }`}
-                />
+                >
+                  {/* Decorative Top Gradient Stripe */}
+                  <div
+                    className={`absolute top-0 left-0 right-0 h-[2px] ${
+                      isPositive
+                        ? 'bg-gradient-to-r from-emerald-500 via-teal-400 to-transparent'
+                        : 'bg-gradient-to-r from-rose-500 via-amber-400 to-transparent'
+                    }`}
+                  />
 
-                {/* Subtle Ambient Radial Glow */}
-                {isCritical && (
-                  <div className="absolute -top-12 -right-12 w-32 h-32 bg-rose-500/10 rounded-full blur-2xl pointer-events-none" />
-                )}
-                {isHigh && (
-                  <div className="absolute -top-12 -right-12 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
-                )}
+                  {/* Subtle Ambient Radial Glow */}
+                  {isCritical && (
+                    <div className="absolute -top-12 -right-12 w-32 h-32 bg-rose-500/10 rounded-full blur-2xl pointer-events-none" />
+                  )}
+                  {isHigh && (
+                    <div className="absolute -top-12 -right-12 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
+                  )}
 
-                <div>
-                  {/* Card Header: Symbol, Name, Anomaly Score Pill */}
-                  <div className="flex items-start justify-between gap-3 mb-3">
-                    <div>
-                      <Link
-                        href={`/stock/${item.symbol}`}
-                        className="font-mono font-bold text-lg text-slate-100 group-hover:text-emerald-400 transition-colors tracking-wide flex items-center gap-1.5"
-                      >
-                        <span>{item.symbol}</span>
-                        <ArrowUpRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity text-emerald-400" />
-                      </Link>
-                      <p className="text-xs text-slate-400 font-sans truncate max-w-[200px] mt-0.5">
-                        {item.name}
-                      </p>
-                    </div>
-
-                    <div
-                      className={`px-2.5 py-1 rounded-full text-[11px] font-mono font-bold flex items-center gap-1.5 shadow-sm shrink-0 ${
-                        isCritical
-                          ? 'bg-rose-950/80 border border-rose-500/50 text-rose-300'
-                          : isHigh
-                          ? 'bg-amber-950/80 border border-amber-500/50 text-amber-300'
-                          : 'bg-slate-800/90 border border-slate-700 text-slate-300'
-                      }`}
-                    >
-                      <Flame className="w-3.5 h-3.5 text-amber-400" />
-                      <span>Score {item.anomalyScore}</span>
-                    </div>
-                  </div>
-
-                  {/* Valuation & Percentage Delta Row */}
-                  <div className="flex items-baseline justify-between gap-2 pt-1">
-                    <div>
-                      <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block">
-                        Live Price
-                      </span>
-                      <span className="text-xl font-bold font-mono text-slate-100 tabular-nums">
-                        {formatINR(item.currentPrice)}
-                      </span>
-                    </div>
-
-                    <div
-                      className={`px-2.5 py-1 rounded-lg text-xs font-mono font-bold flex items-center gap-1 tabular-nums shadow-sm ${
-                        isPositive
-                          ? 'bg-emerald-950/70 border border-emerald-500/40 text-emerald-300'
-                          : 'bg-rose-950/70 border border-rose-500/40 text-rose-300'
-                      }`}
-                    >
-                      {isPositive ? (
-                        <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
-                      ) : (
-                        <TrendingDown className="w-3.5 h-3.5 text-rose-400" />
-                      )}
-                      <span>{formatPercent(item.priceDeltaPercent)}</span>
-                    </div>
-                  </div>
-
-                  {/* Recessed Mini Telemetry Panel & Sparkline */}
-                  <div className="my-3.5 p-3 rounded-xl bg-slate-950/70 border border-slate-800/80 flex items-center justify-between gap-3 shadow-inner">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-1.5 text-[11px] font-mono text-slate-400">
-                        <span className="text-slate-500">T₀ Delta:</span>
-                        <strong className={`font-semibold ${isPositive ? 'text-emerald-400' : 'text-rose-400'}`}>
-                          {formatINR(item.priceDelta, { showSign: true })}
-                        </strong>
-                      </div>
-                      <div className="flex items-center gap-1.5 text-[11px] font-mono text-slate-400">
-                        <span className="text-slate-500">Volume:</span>
-                        <span
-                          className={`font-semibold ${
-                            item.volumeRatio >= 2.0 ? 'text-amber-400 font-bold' : 'text-slate-300'
-                          }`}
+                  <div>
+                    {/* Card Header: Symbol, Name, Anomaly Score Pill */}
+                    <div className="flex items-start justify-between gap-3 mb-3">
+                      <div>
+                        <Link
+                          href={`/stock/${item.symbol}`}
+                          className="font-mono font-bold text-lg text-slate-100 group-hover:text-emerald-400 transition-colors tracking-wide flex items-center gap-1.5"
                         >
-                          {item.volumeRatio.toFixed(1)}x normal
+                          <span>{item.symbol}</span>
+                          <ArrowUpRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity text-emerald-400" />
+                        </Link>
+                        <p className="text-xs text-slate-400 font-sans truncate max-w-[200px] mt-0.5">
+                          {item.name}
+                        </p>
+                      </div>
+
+                      <div
+                        className={`px-2.5 py-1 rounded-full text-[11px] font-mono font-bold flex items-center gap-1.5 shadow-sm shrink-0 ${
+                          isCritical
+                            ? 'bg-rose-950/80 border border-rose-500/50 text-rose-300'
+                            : isHigh
+                            ? 'bg-amber-950/80 border border-amber-500/50 text-amber-300'
+                            : 'bg-slate-800/90 border border-slate-700 text-slate-300'
+                        }`}
+                      >
+                        <Flame className="w-3.5 h-3.5 text-amber-400" />
+                        <span>Score {item.anomalyScore}</span>
+                      </div>
+                    </div>
+
+                    {/* Valuation & Percentage Delta Row */}
+                    <div className="flex items-baseline justify-between gap-2 pt-1">
+                      <div>
+                        <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block">
+                          Live Price
+                        </span>
+                        <span className="text-xl font-bold font-mono text-slate-100 tabular-nums">
+                          {formatINR(item.currentPrice)}
                         </span>
                       </div>
+
+                      <div
+                        className={`px-2.5 py-1 rounded-lg text-xs font-mono font-bold flex items-center gap-1 tabular-nums shadow-sm ${
+                          isPositive
+                            ? 'bg-emerald-950/70 border border-emerald-500/40 text-emerald-300'
+                            : 'bg-rose-950/70 border border-rose-500/40 text-rose-300'
+                        }`}
+                      >
+                        {isPositive ? (
+                          <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
+                        ) : (
+                          <TrendingDown className="w-3.5 h-3.5 text-rose-400" />
+                        )}
+                        <span>{formatPercent(displayDeltaPercent)}</span>
+                      </div>
                     </div>
 
-                    <div className="flex flex-col items-end">
-                      <Sparkline
-                        data={item.sparkline}
-                        width={84}
-                        height={24}
-                        isPositive={isPositive}
-                        strokeWidth={1.75}
-                      />
-                      <span className="text-[9px] font-mono text-slate-500 mt-0.5">Intraday 30M</span>
+                    {/* Recessed Mini Telemetry Panel & Sparkline */}
+                    <div className="my-3.5 p-3 rounded-xl bg-slate-950/70 border border-slate-800/80 flex items-center justify-between gap-3 shadow-inner">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-1.5 text-[11px] font-mono text-slate-400">
+                          <span className="text-slate-500">T₀ Delta:</span>
+                          <strong className={`font-semibold ${isPositive ? 'text-emerald-400' : 'text-rose-400'}`}>
+                            {formatINR(displayPriceDelta, { showSign: true })}
+                          </strong>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-[11px] font-mono text-slate-400">
+                          <span className="text-slate-500">Volume:</span>
+                          <span
+                            className={`font-semibold ${
+                              item.volumeRatio >= 2.0 ? 'text-amber-400 font-bold' : 'text-slate-300'
+                            }`}
+                          >
+                            {item.volumeRatio.toFixed(1)}x normal
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col items-end">
+                        <Sparkline
+                          data={item.sparkline}
+                          width={90}
+                          height={28}
+                          isPositive={isPositive}
+                          strokeWidth={2}
+                          showEndpoint={true}
+                        />
+                        <span className="text-[9px] font-mono text-slate-500 mt-0.5">Intraday 30M</span>
+                      </div>
                     </div>
-                  </div>
 
                   {/* Clean Rationale Tag Pills (No text truncation!) */}
                   <div className="space-y-1.5 min-h-[56px]">

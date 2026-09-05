@@ -193,7 +193,17 @@ export function WatchlistTable({
             ) : (
               filteredItems.map((item) => {
                 const flash = flashStates[item.symbol];
-                const isPositiveDelta = item.priceDelta >= 0;
+                const displayDeltaPercent =
+                  Math.abs(item.priceDeltaPercent) > 25
+                    ? item.dayChangePercent
+                    : (item.priceDeltaPercent !== 0 ? item.priceDeltaPercent : item.dayChangePercent);
+
+                const displayPriceDelta =
+                  Math.abs(item.priceDeltaPercent) > 25
+                    ? Number((item.currentPrice * (item.dayChangePercent / 100)).toFixed(2))
+                    : item.priceDelta;
+
+                const isPositiveDelta = displayDeltaPercent >= 0;
                 const isPositiveDay = item.dayChangePercent >= 0;
 
                 // Day range calculation
@@ -257,10 +267,10 @@ export function WatchlistTable({
                           }`}
                         >
                           {isPositiveDelta ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                          <span>{formatPercent(item.priceDeltaPercent)}</span>
+                          <span>{formatPercent(displayDeltaPercent)}</span>
                         </span>
                         <span className="text-[10px] font-mono text-slate-400 mt-0.5">
-                          {formatINR(item.priceDelta, { showSign: true })}
+                          {formatINR(displayPriceDelta, { showSign: true })}
                         </span>
                       </div>
                     </td>
@@ -315,10 +325,11 @@ export function WatchlistTable({
                     <td className="py-3.5 px-4 text-center">
                       <Sparkline
                         data={item.sparkline}
-                        width={75}
-                        height={24}
+                        width={84}
+                        height={26}
                         isPositive={isPositiveDelta}
-                        strokeWidth={1.5}
+                        strokeWidth={2}
+                        showEndpoint={true}
                       />
                     </td>
 
