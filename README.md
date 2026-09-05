@@ -35,16 +35,35 @@ When a user returns after minutes, hours, or days, PulseMark computes multi-dime
 
 # ✨ Core Features
 
-- 🎯 **Temporal Delta Diffing ($T_0$ vs $T_{\text{now}}$):** Measures price, volume, and volatility displacement relative to the user's exact departure timestamp rather than an arbitrary midnight clock.
-- ⚡ **Top Deck Attention Desk:** Automatically promotes equities with anomalous movements into a high-visibility deck with clear, natural-language rationale chips (`Volume: 3.5x normal`, `Broke Day's Resistance`, `Delta: +₹42 since logout`).
-- 📊 **High-Density Watchlist Matrix:** Tabular terminal view with real-time micro-flashing on tick up/down (Emerald `#10B981` / Rose `#F43F5E`), dynamic SVG sparklines, 52-week range bars, and instant search filtering.
-- 🛡️ **3-Tier Circuit Breaker Ingestion:** Fail-safe architecture featuring primary live Yahoo Finance NSE quote batching, secondary Redis stale caching with countdown flags, and tertiary synthetic simulation fallback.
-- 🔬 **Asset Deep Dive & Financial Spline Canvas (`/stock/[symbol]`):** Side-by-side session comparison matrix, continuous Catmull-Rom cubic spline trajectory with dual X (Timeline) & Y (Price) coordinate axes, interactive crosshair scrubbing, baseline $T_0$ reference guideline, and threshold audit logs.
-- 🎛️ **Interactive Anomaly Heuristic Playground (`/docs`):** Real-time quantitative simulation sandbox with live sliders and instant one-click scenario presets (*Institutional Squeeze, Flash Breakdown, Quiet Session*).
-- 🏛️ **Architecture Canvas & Interactive ADRs (`/docs`):** Click-to-inspect 4-stage pipeline visualizer and Architectural Decision Records detailing SSE vs. WebSockets, in-memory buffers, and beacon persistence.
-- 🧪 **Evaluator & Scenario Simulator (`?demo=evaluator`):** Built-in scenario testing drawer enabling instant session time-travel (15m, 2h, 1d), volatility shocks ($\pm 4\%$), and simulated network dropouts.
-- 💾 **Zero-Loss Beacon Persistence:** Uses `navigator.sendBeacon` to reliably commit exit snapshots to the server on browser close or tab switch without blocking the main UI thread.
-- 🚀 **Zero-Config In-Memory Default:** Boots instantly without requiring PostgreSQL or Redis containers, while seamlessly upgrading to Prisma PostgreSQL and Redis when connection strings are provided.
+* 🎯 **Temporal Delta Diffing ($T_0$ vs $T_{\text{now}}$):**  
+  Measures price, volume, and volatility displacement relative to the user's exact departure timestamp rather than an arbitrary midnight clock.
+
+* ⚡ **Top Deck Attention Desk:**  
+  Automatically promotes equities with anomalous movements into a high-visibility deck with clear, natural-language rationale chips (`Volume: 3.5x normal`, `Broke Day's Resistance`, `Delta: +₹42 since logout`).
+
+* 📊 **High-Density Watchlist Matrix:**  
+  Tabular terminal view with real-time micro-flashing on tick up/down (Emerald `#10B981` / Rose `#F43F5E`), smooth Catmull-Rom cubic Bézier trend splines, 52-week range bars, and instant search filtering.
+
+* 🛡️ **3-Tier Circuit Breaker Ingestion:**  
+  Fail-safe architecture featuring primary live Yahoo Finance NSE quote batching, secondary Redis stale caching with countdown flags, and tertiary synthetic simulation fallback.
+
+* 🔬 **Asset Deep Dive & Financial Spline Canvas (`/stock/[symbol]`):**  
+  Side-by-side session comparison matrix, continuous Catmull-Rom cubic spline trajectory with dual X (Timeline) & Y (Price) coordinate axes, interactive crosshair scrubbing, baseline $T_0$ reference guideline, and threshold audit logs.
+
+* 🎛️ **Interactive Anomaly Heuristic Playground (`/docs`):**  
+  Real-time quantitative simulation sandbox with live sliders and instant one-click scenario presets (*Institutional Squeeze, Flash Breakdown, Quiet Session*).
+
+* 🏛️ **Architecture Canvas & Interactive ADRs (`/docs`):**  
+  Click-to-inspect 4-stage pipeline visualizer and Architectural Decision Records detailing SSE vs. WebSockets, in-memory buffers, and beacon persistence.
+
+* 🧪 **Evaluator & Scenario Simulator (`?demo=evaluator`):**  
+  Built-in scenario testing drawer enabling instant session time-travel (15m, 2h, 1d), volatility shocks ($\pm 4\%$), and simulated network dropouts.
+
+* 💾 **Zero-Loss Beacon Persistence:**  
+  Uses `navigator.sendBeacon` to reliably commit exit snapshots to the server on browser close or tab switch without blocking the main UI thread.
+
+* 🚀 **Zero-Config In-Memory Default:**  
+  Boots instantly without requiring PostgreSQL or Redis containers, while seamlessly upgrading to Prisma PostgreSQL and Redis when connection strings are provided.
 
 ---
 
