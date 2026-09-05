@@ -186,6 +186,10 @@ All API routes are served under `/api` and feature automatic URL normalization.
 
 ![Main Terminal Dashboard](assets/screenshots/dashboard_overview.png)
 
+## 📊 High-Density Watchlist Matrix & 30M Trend Splines
+
+![Watchlist Matrix](assets/screenshots/watchlist_matrix.png)
+
 ## 🔬 Single Asset Deep-Dive & Continuous Financial Spline Canvas
 
 ![Stock Deep Dive](assets/screenshots/stock_deep_dive.png)
