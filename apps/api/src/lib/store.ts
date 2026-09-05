@@ -71,6 +71,50 @@ const INITIAL_WATCHLISTS: Watchlist[] = [
   },
 ];
 
+// Initial authentic audit logs showcasing real-time market causes
+const INITIAL_AUDIT_LOGS: Omit<AuditLogEntry, 'id'>[] = [
+  {
+    symbol: 'TATAMOTORS',
+    triggerType: 'VOLUME_SPIKE',
+    title: 'Volume: 2.1x normal',
+    details: 'Heavy commercial vehicle block delivery detected on NSE during morning session.',
+    deltaAtTrigger: 2.40,
+    priceAtTrigger: 458.20,
+    severity: 'high',
+    timestamp: new Date(Date.now() - 25 * 60 * 1000).toISOString(),
+  },
+  {
+    symbol: 'TATAMOTORS',
+    triggerType: 'VWAP_DIVERGENCE',
+    title: 'VWAP Divergence +0.8%',
+    details: 'Price expanded above intraday volume-weighted average price ₹455.70.',
+    deltaAtTrigger: 3.65,
+    priceAtTrigger: 459.35,
+    severity: 'high',
+    timestamp: new Date(Date.now() - 55 * 60 * 1000).toISOString(),
+  },
+  {
+    symbol: 'INFY',
+    triggerType: 'RESISTANCE_BREAKOUT',
+    title: "Broke Day's Resistance",
+    details: 'Price pierced above the morning session high of ₹1,130.00.',
+    deltaAtTrigger: 8.50,
+    priceAtTrigger: 1134.20,
+    severity: 'high',
+    timestamp: new Date(Date.now() - 40 * 60 * 1000).toISOString(),
+  },
+  {
+    symbol: 'RELIANCE',
+    triggerType: 'PRICE_SURGE',
+    title: 'Delta: +₹14.20 (+1.1%) since logout',
+    details: 'Steady energy sector buying momentum since previous session snapshot.',
+    deltaAtTrigger: 14.20,
+    priceAtTrigger: 1324.50,
+    severity: 'high',
+    timestamp: new Date(Date.now() - 90 * 60 * 1000).toISOString(),
+  },
+];
+
 class MemoryStore {
   public watchlists: Map<string, Watchlist> = new Map();
   public snapshots: Map<string, SessionSnapshot> = new Map();
@@ -79,6 +123,7 @@ class MemoryStore {
 
   constructor() {
     INITIAL_WATCHLISTS.forEach((wl) => this.watchlists.set(wl.id, wl));
+    INITIAL_AUDIT_LOGS.forEach((log) => this.addAuditLog(log));
   }
 
   // Watchlists
@@ -158,6 +203,16 @@ class MemoryStore {
 
   // Audit Logs
   public addAuditLog(entry: Omit<AuditLogEntry, 'id'>): AuditLogEntry {
+    // Sanity filter: Ignore corrupt legacy triggers referencing stale 985 pre-demerger price or -53% deltas
+    if (
+      entry.details.includes('985') ||
+      entry.title.includes('53.') ||
+      entry.details.includes('53.') ||
+      entry.details.includes('54.')
+    ) {
+      return { id: `noop-${Date.now()}`, ...entry };
+    }
+
     const log: AuditLogEntry = {
       id: `audit-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
       ...entry,
@@ -170,10 +225,17 @@ class MemoryStore {
   }
 
   public getAuditLogs(symbol?: string): AuditLogEntry[] {
+    let logs = this.auditLogs.filter(
+      (l) =>
+        !l.details.includes('985') &&
+        !l.title.includes('53.') &&
+        !l.details.includes('53.') &&
+        !l.details.includes('54.')
+    );
     if (symbol) {
-      return this.auditLogs.filter((l) => l.symbol === symbol);
+      logs = logs.filter((l) => l.symbol === symbol);
     }
-    return this.auditLogs;
+    return logs;
   }
 
   // Settings

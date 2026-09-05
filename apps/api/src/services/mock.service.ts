@@ -11,24 +11,24 @@ interface StockDefinition {
 }
 
 const STOCK_DEFINITIONS: StockDefinition[] = [
-  { symbol: 'TATAMOTORS', name: 'Tata Motors Ltd', basePrice: 984.50, avgVolume30d: 12500000, week52High: 1065.60, week52Low: 600.50, volatility: 0.008 },
-  { symbol: 'INFY', name: 'Infosys Limited', basePrice: 1482.00, avgVolume30d: 6800000, week52High: 1720.00, week52Low: 1350.00, volatility: 0.006 },
-  { symbol: 'TCS', name: 'Tata Consultancy Services', basePrice: 4120.00, avgVolume30d: 2400000, week52High: 4500.00, week52Low: 3300.00, volatility: 0.004 },
-  { symbol: 'RELIANCE', name: 'Reliance Industries', basePrice: 2895.00, avgVolume30d: 7900000, week52High: 3217.00, week52Low: 2220.00, volatility: 0.005 },
-  { symbol: 'HDFCBANK', name: 'HDFC Bank Limited', basePrice: 1640.50, avgVolume30d: 18000000, week52High: 1757.00, week52Low: 1363.00, volatility: 0.005 },
-  { symbol: 'ITC', name: 'ITC Limited', basePrice: 480.10, avgVolume30d: 11000000, week52High: 510.00, week52Low: 399.00, volatility: 0.003 },
-  { symbol: 'ICICIBANK', name: 'ICICI Bank Ltd', basePrice: 1152.00, avgVolume30d: 14000000, week52High: 1257.00, week52Low: 898.00, volatility: 0.006 },
-  { symbol: 'BHARTIARTL', name: 'Bharti Airtel Ltd', basePrice: 1345.00, avgVolume30d: 5500000, week52High: 1480.00, week52Low: 840.00, volatility: 0.005 },
-  { symbol: 'SBIN', name: 'State Bank of India', basePrice: 822.40, avgVolume30d: 19000000, week52High: 912.00, week52Low: 555.00, volatility: 0.007 },
-  { symbol: 'BAJFINANCE', name: 'Bajaj Finance Ltd', basePrice: 6850.00, avgVolume30d: 1500000, week52High: 8192.00, week52Low: 6187.00, volatility: 0.009 },
+  { symbol: 'TATAMOTORS', name: 'Tata Motors Ltd', basePrice: 458.20, avgVolume30d: 12500000, week52High: 469.20, week52Low: 380.50, volatility: 0.008 },
+  { symbol: 'INFY', name: 'Infosys Limited', basePrice: 1130.00, avgVolume30d: 6800000, week52High: 1250.00, week52Low: 980.00, volatility: 0.006 },
+  { symbol: 'TCS', name: 'Tata Consultancy Services', basePrice: 2820.00, avgVolume30d: 2400000, week52High: 3200.00, week52Low: 2400.00, volatility: 0.004 },
+  { symbol: 'RELIANCE', name: 'Reliance Industries', basePrice: 1322.00, avgVolume30d: 7900000, week52High: 1600.00, week52Low: 1100.00, volatility: 0.005 },
+  { symbol: 'HDFCBANK', name: 'HDFC Bank Limited', basePrice: 712.10, avgVolume30d: 18000000, week52High: 850.00, week52Low: 620.00, volatility: 0.005 },
+  { symbol: 'ITC', name: 'ITC Limited', basePrice: 264.10, avgVolume30d: 11000000, week52High: 310.00, week52Low: 220.00, volatility: 0.003 },
+  { symbol: 'ICICIBANK', name: 'ICICI Bank Ltd', basePrice: 1423.20, avgVolume30d: 14000000, week52High: 1550.00, week52Low: 1150.00, volatility: 0.006 },
+  { symbol: 'BHARTIARTL', name: 'Bharti Airtel Ltd', basePrice: 1840.00, avgVolume30d: 5500000, week52High: 1950.00, week52Low: 1350.00, volatility: 0.005 },
+  { symbol: 'SBIN', name: 'State Bank of India', basePrice: 1016.10, avgVolume30d: 19000000, week52High: 1120.00, week52Low: 750.00, volatility: 0.007 },
+  { symbol: 'BAJFINANCE', name: 'Bajaj Finance Ltd', basePrice: 1060.50, avgVolume30d: 1500000, week52High: 1250.00, week52Low: 850.00, volatility: 0.009 },
   { symbol: 'MARUTI', name: 'Maruti Suzuki India', basePrice: 12420.00, avgVolume30d: 480000, week52High: 13400.00, week52Low: 9250.00, volatility: 0.006 },
   { symbol: 'M&M', name: 'Mahindra & Mahindra', basePrice: 2755.00, avgVolume30d: 3200000, week52High: 3010.00, week52Low: 1450.00, volatility: 0.008 },
   { symbol: 'LT', name: 'Larsen & Toubro', basePrice: 3560.00, avgVolume30d: 2100000, week52High: 3919.00, week52Low: 2860.00, volatility: 0.005 },
-  { symbol: 'TITAN', name: 'Titan Company Ltd', basePrice: 3415.00, avgVolume30d: 1100000, week52High: 3886.00, week52Low: 2882.00, volatility: 0.007 },
+  { symbol: 'TITAN', name: 'Titan Company Ltd', basePrice: 5020.00, avgVolume30d: 1100000, week52High: 5400.00, week52Low: 3200.00, volatility: 0.007 },
   { symbol: 'SUNPHARMA', name: 'Sun Pharma Industries', basePrice: 1585.00, avgVolume30d: 3900000, week52High: 1720.00, week52Low: 1080.00, volatility: 0.005 },
-  { symbol: 'KOTAKBANK', name: 'Kotak Mahindra Bank', basePrice: 1780.00, avgVolume30d: 4200000, week52High: 1930.00, week52Low: 1540.00, volatility: 0.006 },
+  { symbol: 'KOTAKBANK', name: 'Kotak Mahindra Bank', basePrice: 424.50, avgVolume30d: 4200000, week52High: 550.00, week52Low: 350.00, volatility: 0.006 },
   { symbol: 'AXISBANK', name: 'Axis Bank Ltd', basePrice: 1195.00, avgVolume30d: 8500000, week52High: 1339.00, week52Low: 960.00, volatility: 0.006 },
-  { symbol: 'WIPRO', name: 'Wipro Limited', basePrice: 492.50, avgVolume30d: 7100000, week52High: 545.00, week52Low: 375.00, volatility: 0.006 },
+  { symbol: 'WIPRO', name: 'Wipro Limited', basePrice: 176.40, avgVolume30d: 7100000, week52High: 220.00, week52Low: 130.00, volatility: 0.006 },
 ];
 
 export class MockStockService {
@@ -48,34 +48,37 @@ export class MockStockService {
 
     for (const def of STOCK_DEFINITIONS) {
       const openPrice = def.basePrice;
-      const prevClose = Number((openPrice * (1 + (Math.random() * 0.01 - 0.005))).toFixed(2));
+      const prevClose = Number((openPrice * 0.996).toFixed(2));
       let currentPrice = openPrice;
       let dayHigh = openPrice;
       let dayLow = openPrice;
-      let cumulativeVolume = 0;
-      let cumulativeValue = 0;
-      const sparkline: number[] = [];
+      const sparkline: number[] = [prevClose, openPrice];
       const candles: StockHistoricalCandle[] = [];
 
-      // Generate intraday 5-minute candles from 9:15 AM to current time (or up to 40 candles)
-      const totalPoints = 36; // 3 hours of 5-min intervals
-      for (let i = 0; i < totalPoints; i++) {
-        const pointTime = new Date(marketOpen.getTime() + i * 5 * 60 * 1000);
-        const randomChange = (Math.random() - 0.49) * def.volatility * currentPrice;
-        const candleOpen = currentPrice;
-        const candleClose = Number((candleOpen + randomChange).toFixed(2));
-        const candleHigh = Number((Math.max(candleOpen, candleClose) + Math.random() * 0.002 * candleOpen).toFixed(2));
-        const candleLow = Number((Math.min(candleOpen, candleClose) - Math.random() * 0.002 * candleOpen).toFixed(2));
-        const candleVolume = Math.floor((def.avgVolume30d / 75) * (0.6 + Math.random() * 0.8));
+      let runningVolume = 0;
+      let runningValue = 0;
 
-        currentPrice = candleClose;
+      // Generate 40 historical 5-minute intervals starting from 09:15 AM
+      for (let i = 0; i < 40; i++) {
+        const pointTime = new Date(marketOpen.getTime() + i * 5 * 60 * 1000);
+        // Realistic subtle Brownian motion
+        const stepPct = (Math.random() - 0.495) * def.volatility;
+        const candleOpen = currentPrice;
+        currentPrice = Number(Math.max(def.week52Low * 0.95, currentPrice * (1 + stepPct)).toFixed(2));
+        const candleHigh = Number(Math.max(candleOpen, currentPrice, currentPrice * (1 + Math.random() * 0.002)).toFixed(2));
+        const candleLow = Number(Math.min(candleOpen, currentPrice, currentPrice * (1 - Math.random() * 0.002)).toFixed(2));
+        const candleClose = currentPrice;
+
         dayHigh = Math.max(dayHigh, candleHigh);
         dayLow = Math.min(dayLow, candleLow);
-        cumulativeVolume += candleVolume;
-        cumulativeValue += candleClose * candleVolume;
-        const currentVWAP = Number((cumulativeValue / cumulativeVolume).toFixed(2));
+
+        const candleVolume = Math.floor(Math.random() * (def.avgVolume30d / 75)) + 5000;
+        runningVolume += candleVolume;
+        runningValue += candleClose * candleVolume;
+        const currentVWAP = Number((runningValue / runningVolume).toFixed(2));
 
         sparkline.push(currentPrice);
+
         candles.push({
           timestamp: pointTime.toISOString(),
           open: candleOpen,
@@ -88,34 +91,34 @@ export class MockStockService {
         });
       }
 
-      // Pre-seed some default anomalies on TATAMOTORS and INFY so Attention Desk has immediate rich data
+      // Pre-seed realistic anomalies on TATAMOTORS and INFY
       let initialVolumeRatio = 1.0;
       if (def.symbol === 'TATAMOTORS') {
-        currentPrice = Number((openPrice * 1.034).toFixed(2)); // +3.4%
+        currentPrice = Number((openPrice * 1.008).toFixed(2));
         dayHigh = Math.max(dayHigh, currentPrice);
-        initialVolumeRatio = 3.2; // 3.2x volume
+        initialVolumeRatio = 2.1;
         sparkline[sparkline.length - 1] = currentPrice;
         const lastCandle = candles[candles.length - 1];
         if (lastCandle) {
           lastCandle.close = currentPrice;
           lastCandle.high = Math.max(lastCandle.high, currentPrice);
           lastCandle.isAnomalyPoint = true;
-          lastCandle.anomalyReason = 'Aggressive Institutional Buying & Volume Spike';
+          lastCandle.anomalyReason = 'Institutional Volume Spike & Trend Continuation';
         }
       } else if (def.symbol === 'INFY') {
-        currentPrice = Number((openPrice * 0.979).toFixed(2)); // -2.1%
+        currentPrice = Number((openPrice * 0.992).toFixed(2));
         dayLow = Math.min(dayLow, currentPrice);
-        initialVolumeRatio = 2.4;
+        initialVolumeRatio = 1.8;
         sparkline[sparkline.length - 1] = currentPrice;
         const lastCandle = candles[candles.length - 1];
         if (lastCandle) {
           lastCandle.close = currentPrice;
           lastCandle.low = Math.min(lastCandle.low, currentPrice);
           lastCandle.isAnomalyPoint = true;
-          lastCandle.anomalyReason = "Broke Day's Key Support Level";
+          lastCandle.anomalyReason = "Support Test Near Session Low";
         }
       } else if (def.symbol === 'RELIANCE') {
-        initialVolumeRatio = 0.35; // Volume compression
+        initialVolumeRatio = 0.45; // Volume compression
       }
 
       const spread = Number((currentPrice * 0.0003).toFixed(2));
@@ -123,7 +126,7 @@ export class MockStockService {
       const askPrice = Number((currentPrice + spread / 2).toFixed(2));
       const change24h = Number((currentPrice - prevClose).toFixed(2));
       const change24hPercent = Number(((change24h / prevClose) * 100).toFixed(2));
-      const vwap = Number((cumulativeValue / (cumulativeVolume || 1)).toFixed(2));
+      const vwap = Number((runningValue / (runningVolume || 1)).toFixed(2));
 
       const tick: StockTick = {
         symbol: def.symbol,
@@ -131,7 +134,7 @@ export class MockStockService {
         price: currentPrice,
         change24h,
         change24hPercent,
-        volume: cumulativeVolume,
+        volume: runningVolume,
         avgVolume30d: def.avgVolume30d,
         volumeRatio: initialVolumeRatio,
         dayHigh,
