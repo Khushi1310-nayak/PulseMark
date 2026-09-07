@@ -17,6 +17,14 @@
 [![Yahoo Finance](https://img.shields.io/badge/Data_Feed-NSE_Live_Quotes-purple?style=for-the-badge)](https://finance.yahoo.com/)
 [![Status](https://img.shields.io/badge/Build-Passing_%26_Verified-success?style=for-the-badge)](https://github.com/Khushi1310-nayak/PulseMark)
 
+<br/>
+
+<p align="center">
+  <a href="https://pulse-mark-web.vercel.app"><b>🌐 Live Web App (Vercel)</b></a> &nbsp;•&nbsp;
+  <a href="http://136.116.1.206/api/health"><b>📡 Cloud API (NSE Live Feed)</b></a> &nbsp;•&nbsp;
+  <a href="./ARCHITECTURE.md"><b>🏛️ Architecture & System Design</b></a>
+</p>
+
 </div>
 
 ---
@@ -68,6 +76,8 @@ When a user returns after minutes, hours, or days, PulseMark computes multi-dime
 ---
 
 # 🏗 System Architecture
+
+> 📘 **For the complete in-depth architectural guide, mathematical models, state machines, and sequence workflows, see [ARCHITECTURE.md](ARCHITECTURE.md).**
 
 ```mermaid
 graph TD
@@ -287,6 +297,24 @@ npm run dev:web
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## 6. Run Automated Tests & Market Feed Audit
+
+PulseMark includes an automated test pipeline verifying the pure mathematical evaluator, real NSE live exchange quotes, multi-temporal baselines, circuit breaker resilience, and Next.js linting:
+
+```bash
+# Execute monorepo test suite across all packages
+npm test
+```
+
+### 100% Genuine NSE Exchange Quotes Verified:
+| Equities Tracked | Yahoo Ticker | Exchange | Real-Time Telemetry Attributes |
+| :--- | :--- | :---: | :--- |
+| **TATAMOTORS** | `TMCV.NS` | NSE | Real live price, VWAP, Spread, Day High/Low, 30D Avg Volume |
+| **INFY, TCS, WIPRO** | `*.NS` | NSE | Real live price, VWAP, Spread, Day High/Low, 30D Avg Volume |
+| **RELIANCE, LT** | `*.NS` | NSE | Real live price, VWAP, Spread, Day High/Low, 30D Avg Volume |
+| **HDFCBANK, ICICIBANK, SBIN, KOTAKBANK, AXISBANK, BAJFINANCE** | `*.NS` | NSE | Real live price, VWAP, Spread, Day High/Low, 30D Avg Volume |
+| **MARUTI, M&M, TITAN, ITC, SUNPHARMA, BHARTIARTL** | `*.NS` | NSE | Real live price, VWAP, Spread, Day High/Low, 30D Avg Volume |
 
 ---
 
