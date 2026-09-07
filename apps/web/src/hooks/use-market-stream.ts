@@ -40,10 +40,10 @@ export function useMarketStream() {
   });
 
   const prevPricesRef = useRef<Record<string, number>>({});
-  const flashTimersRef = useRef<Record<string, NodeJS.Timeout>>({});
+  const flashTimersRef = useRef<Record<string, any>>({});
   const eventSourceRef = useRef<EventSource | null>(null);
   const reconnectAttemptsRef = useRef(0);
-  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const reconnectTimeoutRef = useRef<any>(null);
 
   const triggerPriceFlash = useCallback((symbol: string, direction: 'up' | 'down') => {
     setData((prev) => ({
@@ -162,7 +162,9 @@ export function useMarketStream() {
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
       }
-      Object.values(flashTimersRef.current).forEach((t) => clearTimeout(t));
+      Object.values(flashTimersRef.current).forEach((t) => {
+        if (t) clearTimeout(t as any);
+      });
     };
   }, [connectSSE]);
 

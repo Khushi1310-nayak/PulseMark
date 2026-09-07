@@ -79,7 +79,7 @@ function DashboardContent() {
   }, [searchParams]);
 
   const activeWatchlist =
-    watchlists.find((w) => w.id === activeWatchlistId) || watchlists[0];
+    watchlists.find((w: Watchlist) => w.id === activeWatchlistId) || watchlists[0];
 
   const handleSnapshotNow = async () => {
     try {
@@ -94,8 +94,8 @@ function DashboardContent() {
     if (!activeWatchlist) return;
     try {
       const updated = await api.removeTicker(activeWatchlist.id, symbol);
-      setWatchlists((prev) =>
-        prev.map((w) => (w.id === updated.id ? updated : w))
+      setWatchlists((prev: Watchlist[]) =>
+        prev.map((w: Watchlist) => (w.id === updated.id ? updated : w))
       );
     } catch (err) {
       console.error('Failed to remove ticker:', err);
@@ -208,7 +208,7 @@ function DashboardContent() {
           onClose={() => setIsAddTickerOpen(false)}
           watchlistId={activeWatchlist.id}
           watchlistName={activeWatchlist.name}
-          existingSymbols={activeWatchlist.items.map((i) => i.symbol)}
+          existingSymbols={activeWatchlist.items.map((i: any) => i.symbol)}
           onTickerAdded={() => {
             loadWatchlists();
             refreshSession();

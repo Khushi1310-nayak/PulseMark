@@ -517,7 +517,7 @@ export function EvaluatorDrawer({
                         <label className="text-[11px] text-slate-400 block mb-1 font-mono">Stock Symbol</label>
                         <select
                           value={customSymbol}
-                          onChange={(e) => {
+                          onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                             setCustomSymbol(e.target.value);
                             setIsCustomSelected(true);
                           }}
@@ -546,7 +546,7 @@ export function EvaluatorDrawer({
                           max="6"
                           step="0.5"
                           value={customDelta}
-                          onChange={(e) => {
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                             setCustomDelta(parseFloat(e.target.value));
                             setIsCustomSelected(true);
                           }}
@@ -564,7 +564,7 @@ export function EvaluatorDrawer({
                           max="5"
                           step="0.5"
                           value={customVolume}
-                          onChange={(e) => {
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                             setCustomVolume(parseFloat(e.target.value));
                             setIsCustomSelected(true);
                           }}
