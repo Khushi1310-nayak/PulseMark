@@ -293,7 +293,7 @@ export default function StockDeepDivePage() {
 
           {/* 4. Day Range Extremes */}
           <div className="p-4 rounded-xl bg-surface border border-border flex flex-col justify-between">
-            <span className="text-[11px] font-mono text-slate-400 uppercase">4. Day's Range</span>
+            <span className="text-[11px] font-mono text-slate-400 uppercase">4. Day&apos;s Range</span>
             <div className="my-3">
               <div className="flex justify-between text-xs font-mono text-slate-300 mb-1">
                 <span>Low: ₹{current.dayLow.toFixed(1)}</span>

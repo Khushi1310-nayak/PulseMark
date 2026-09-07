@@ -96,7 +96,7 @@ export function StockChart({
       ticks.push(maxPrice - (i / steps) * priceRange);
     }
     return ticks;
-  }, [minPrice, maxPrice, priceRange]);
+  }, [maxPrice, priceRange]);
 
   // X-Axis Timeline Ticks
   const timeTicks = useMemo(() => {

@@ -154,6 +154,7 @@ export function useMarketStream() {
 
   useEffect(() => {
     connectSSE();
+    const flashTimers = flashTimersRef.current;
 
     return () => {
       if (eventSourceRef.current) {
@@ -162,7 +163,7 @@ export function useMarketStream() {
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
       }
-      Object.values(flashTimersRef.current).forEach((t) => {
+      Object.values(flashTimers).forEach((t) => {
         if (t) clearTimeout(t as any);
       });
     };
