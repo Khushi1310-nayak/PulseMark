@@ -27,17 +27,17 @@ PulseMark is built around an **asymmetric, event-driven data flow**. Instead of 
 ```mermaid
 flowchart TD
     subgraph External ["External Exchange and Data Sources"]
-        NSE["National Stock Exchange (NSE)"]
+        NSE["National Stock Exchange - NSE"]
         YF["Yahoo Finance Live Ingestion Engine"]
         NSE --> YF
     end
 
-    subgraph BackendAPI ["PulseMark Fastify API Engine (:3001)"]
-        FeedService["Feed Ingestion Service (Batching and Circuit Breaker)"]
-        DeltaService["Delta Calculation Service (Multi-Temporal Baselines)"]
-        Evaluator["Pure Anomaly Evaluator (Composite Scoring Formula)"]
-        SessionStore["Hybrid Persistence (Prisma SQLite / Redis)"]
-        SSERouter["SSE Stream Router (/api/stream/ticks)"]
+    subgraph BackendAPI ["PulseMark Fastify API Engine - Port 3001"]
+        FeedService["Feed Ingestion Service - Batching and Circuit Breaker"]
+        DeltaService["Delta Calculation Service - Multi-Temporal Baselines"]
+        Evaluator["Pure Anomaly Evaluator - Composite Scoring Formula"]
+        SessionStore["Hybrid Persistence - Prisma SQLite and Redis"]
+        SSERouter["SSE Stream Router - Stream Ticks Endpoint"]
 
         YF -->|Raw Ticks Every 2.5s| FeedService
         FeedService -->|Normalized Stock Ticks| DeltaService
@@ -46,13 +46,13 @@ flowchart TD
         DeltaService <--> SessionStore
     end
 
-    subgraph ClientApp ["PulseMark Next.js 14 Web Terminal (:3000)"]
-        useMarketStream["useMarketStream Hook (Auto-reconnect and Heartbeat)"]
-        DiffEngine["Ref-Based Micro Flash Engine (Green/Red Transition)"]
-        AttentionDeskUI["Attention Desk (Top Priority Cards)"]
-        WatchlistUI["High-Density Watchlist Matrix (30M Splines and 52W Bars)"]
-        CanvasChart["Catmull-Rom Spline Canvas (Retina 2x Normalizer)"]
-        BeaconSender["sendBeacon Lifecycle Manager (VisibilityChange and Unload)"]
+    subgraph ClientApp ["PulseMark Next.js 14 Web Terminal - Port 3000"]
+        useMarketStream["useMarketStream Hook - Auto Reconnect and Heartbeat"]
+        DiffEngine["Ref-Based Micro Flash Engine - Green and Red Transition"]
+        AttentionDeskUI["Attention Desk - Top Priority Cards"]
+        WatchlistUI["High-Density Watchlist Matrix - 30M Splines and 52W Bars"]
+        CanvasChart["Catmull-Rom Spline Canvas - Retina 2x Normalizer"]
+        BeaconSender["sendBeacon Lifecycle Manager - VisibilityChange and Unload"]
 
         SSERouter -->|HTTP/2 Server-Sent Events| useMarketStream
         useMarketStream --> DiffEngine
@@ -363,29 +363,29 @@ flowchart TD
     TraderClient["Trader Client Browser"]
 
     subgraph VercelEdge ["Vercel Global Edge Network"]
-        NextFrontend["Next.js 14 App Router (pulse-mark-web.vercel.app)"]
-        NextRewrite["Next.js Route Rewriter (/api/:path*)"]
+        NextFrontend["Next.js 14 App Router - pulse-mark-web.vercel.app"]
+        NextRewrite["Next.js Route Rewriter to API"]
         NextFrontend --> NextRewrite
     end
 
-    subgraph CloudVM ["Google Cloud Compute Engine VM (136.116.1.206)"]
-        Nginx["Nginx Reverse Proxy (Port 80)"]
+    subgraph CloudVM ["Google Cloud Compute Engine VM - 136.116.1.206"]
+        Nginx["Nginx Reverse Proxy - Port 80"]
         PM2["PM2 Process Manager"]
-        FastifyServer["Fastify 4.x Production Server (Port 3001)"]
-        RedisInstance["Redis In-Memory Cache (Port 6379)"]
+        FastifyServer["Fastify 4.x Production Server - Port 3001"]
+        RedisInstance["Redis In-Memory Cache - Port 6379"]
 
-        Nginx -->|proxy_buffering off| FastifyServer
+        Nginx -->|Proxy Pass No Buffering| FastifyServer
         PM2 -->|Process Monitor| FastifyServer
         FastifyServer <--> RedisInstance
     end
 
     subgraph ExchangeData ["External Live Feed"]
-        YahooNSE["Yahoo Finance (NSE Live Quotes)"]
+        YahooNSE["Yahoo Finance - NSE Live Quotes"]
         FastifyServer <-->|Batch REST Quotes Every 2.5s| YahooNSE
     end
 
-    TraderClient -->|HTTPS (Frontend Delivery)| NextFrontend
-    TraderClient -->|SSE / REST API Requests| Nginx
+    TraderClient -->|HTTPS Frontend Delivery| NextFrontend
+    TraderClient -->|SSE and REST API Requests| Nginx
     NextRewrite -->|Backend Proxy Pass| Nginx
 ```
 
