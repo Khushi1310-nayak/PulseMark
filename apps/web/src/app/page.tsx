@@ -72,6 +72,9 @@ function DashboardContent() {
   useEffect(() => {
     if (searchParams.get('demo') === 'evaluator' || searchParams.get('demo') === 'true') {
       setIsEvaluatorOpen(true);
+      if (typeof window !== 'undefined') {
+        window.history.replaceState({}, '', window.location.pathname);
+      }
     }
   }, [searchParams]);
 
@@ -179,6 +182,7 @@ function DashboardContent() {
         onClose={() => setIsEvaluatorOpen(false)}
         onStateUpdated={() => refreshSession()}
         onApplyState={(payload) => applyImmediateState(payload)}
+        ticks={ticks}
         currentBenchmarkLabel={snapshot?.benchmarkLabel}
         isCircuitBreakerTripped={feedHealth?.isCircuitBreakerTripped}
       />

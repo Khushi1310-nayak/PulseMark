@@ -62,6 +62,7 @@ export class FeedIngestionService {
   private tickInterval: NodeJS.Timeout | null = null;
   private sparklineCache: Map<string, number[]> = new Map();
   private lastKnownTicks: Map<string, StockTick> = new Map();
+  private activeShocks: Map<string, { tick: StockTick; expiresAt: number }> = new Map();
 
   constructor() {
     this.yf = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
@@ -83,7 +84,64 @@ export class FeedIngestionService {
       this.status.source = 'LIVE_FEED';
       this.status.provider = 'Yahoo Finance (NSE Live Feed)';
       this.status.errorCount = 0;
+      this.activeShocks.clear();
     }
+  }
+
+  public injectShock(
+    symbol: string,
+    deltaPercent: number,
+    volumeMultiplier: number = 2.5,
+    customReason?: string
+  ): StockTick | null {
+    const canonicalSymbol = symbol.toUpperCase();
+    const baseTick = this.lastKnownTicks.get(canonicalSymbol) || mockStockService.getTick(canonicalSymbol);
+    if (!baseTick) return null;
+
+    const priceShift = (baseTick.price * deltaPercent) / 100;
+    const newPrice = Number((baseTick.price + priceShift).toFixed(2));
+    const newDayHigh = Math.max(baseTick.dayHigh, newPrice);
+    const newDayLow = Math.min(baseTick.dayLow, newPrice);
+    const newVolumeRatio = Number(volumeMultiplier.toFixed(1));
+    const newVolume = Math.floor(baseTick.volume + (baseTick.avgVolume30d / 20) * volumeMultiplier);
+    const newChange24h = Number((newPrice - baseTick.prevClose).toFixed(2));
+    const newChange24hPercent = Number(((newChange24h / baseTick.prevClose) * 100).toFixed(2));
+
+    const existingSparkline = this.sparklineCache.get(canonicalSymbol) || baseTick.sparkline;
+    const updatedSparkline = [...existingSparkline.slice(-29), newPrice];
+    this.sparklineCache.set(canonicalSymbol, updatedSparkline);
+
+    const shockedTick: StockTick = {
+      ...baseTick,
+      price: newPrice,
+      dayHigh: newDayHigh,
+      dayLow: newDayLow,
+      change24h: newChange24h,
+      change24hPercent: newChange24hPercent,
+      volume: newVolume,
+      volumeRatio: newVolumeRatio,
+      sparkline: updatedSparkline,
+      timestamp: new Date().toISOString(),
+    };
+
+    this.activeShocks.set(canonicalSymbol, {
+      tick: shockedTick,
+      expiresAt: Date.now() + 15 * 60 * 1000,
+    });
+    this.lastKnownTicks.set(canonicalSymbol, shockedTick);
+
+    // Keep mock service in sync
+    mockStockService.injectVolatility(canonicalSymbol, deltaPercent, volumeMultiplier, customReason);
+
+    // Broadcast immediately to all connected clients
+    const allTicks = this.getAllKnownTicks();
+    this.listeners.forEach((listener) => listener(allTicks));
+
+    return shockedTick;
+  }
+
+  public clearShocks(): void {
+    this.activeShocks.clear();
   }
 
   public subscribe(callback: (ticks: StockTick[]) => void): () => void {
@@ -111,6 +169,15 @@ export class FeedIngestionService {
     for (const q of quotes) {
       if (!q.symbol) continue;
       const canonicalSymbol = YAHOO_TO_SYMBOL[q.symbol] || q.symbol.replace('.NS', '');
+
+      // If there's an active simulated shock for this symbol, preserve the shock tick
+      const shock = this.activeShocks.get(canonicalSymbol);
+      if (shock && Date.now() < shock.expiresAt) {
+        ticks.push(shock.tick);
+        this.lastKnownTicks.set(canonicalSymbol, shock.tick);
+        continue;
+      }
+
       const price = Number((q.regularMarketPrice ?? 0).toFixed(2));
       const prevClose = Number((q.regularMarketPreviousClose ?? price).toFixed(2));
       const openPrice = Number((q.regularMarketOpen ?? prevClose).toFixed(2));

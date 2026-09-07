@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { StockTick } from '@pulsemark/shared';
 import { api } from '../lib/api';
 import {
   X,
@@ -26,6 +27,7 @@ interface EvaluatorDrawerProps {
   onClose: () => void;
   onStateUpdated: () => void;
   onApplyState?: (data: any) => void;
+  ticks?: Record<string, StockTick>;
   currentBenchmarkLabel?: string;
   isCircuitBreakerTripped?: boolean;
 }
@@ -107,6 +109,7 @@ export function EvaluatorDrawer({
   onClose,
   onStateUpdated,
   onApplyState,
+  ticks,
   currentBenchmarkLabel,
   isCircuitBreakerTripped,
 }: EvaluatorDrawerProps) {
@@ -125,10 +128,17 @@ export function EvaluatorDrawer({
   const [simulatedNetworkDrop, setSimulatedNetworkDrop] = useState(isCircuitBreakerTripped || false);
   const [forceStale, setForceStale] = useState(false);
 
+  const handleCloseClean = () => {
+    if (typeof window !== 'undefined' && window.location.search.includes('demo=')) {
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+    onClose();
+  };
+
   // "Apply & Close" Action: Immediate close, instant 0ms optimistic state, and background sync
   const handleApplyAndClose = () => {
-    // 1. Immediately close drawer so the UI never feels stuck
-    onClose();
+    // 1. Immediately clean query param and close drawer
+    handleCloseClean();
 
     // 2. Optimistic instant state application
     if (activeTab === 'time_travel') {
@@ -147,15 +157,44 @@ export function EvaluatorDrawer({
         })
         .catch((err) => console.error('Time travel failed:', err));
     } else if (activeTab === 'shocks') {
+      const targetAnomaly = selectedAnomaly || PRESET_ANOMALIES[0];
+      const targetSym = (isCustomSelected ? customSymbol : targetAnomaly.symbol).toUpperCase();
+      const targetDelta = isCustomSelected ? customDelta : targetAnomaly.delta;
+      const targetVol = isCustomSelected ? customVolume : targetAnomaly.volRatio;
+      const targetReason = isCustomSelected
+        ? `Forced Shock ${customDelta >= 0 ? '+' : ''}${customDelta}%`
+        : targetAnomaly.reason;
+
+      // Optimistic instant client-side tick update
+      if (ticks && ticks[targetSym]) {
+        const baseTick = ticks[targetSym];
+        const priceShift = (baseTick.price * targetDelta) / 100;
+        const newPrice = Number((baseTick.price + priceShift).toFixed(2));
+        const shockedTick: StockTick = {
+          ...baseTick,
+          price: newPrice,
+          dayHigh: Math.max(baseTick.dayHigh, newPrice),
+          dayLow: Math.min(baseTick.dayLow, newPrice),
+          change24hPercent: Number((baseTick.change24hPercent + targetDelta).toFixed(2)),
+          volumeRatio: targetVol,
+          sparkline: [...baseTick.sparkline.slice(-29), newPrice],
+          timestamp: new Date().toISOString(),
+        };
+        onApplyState?.({
+          tick: shockedTick,
+          ticks: [shockedTick],
+        });
+      }
+
       if (isCustomSelected) {
-        api.injectVolatility(customSymbol, customDelta, customVolume, `Forced Shock ${customDelta >= 0 ? '+' : ''}${customDelta}%`)
+        api.injectVolatility(customSymbol, customDelta, customVolume, targetReason)
           .then((res) => {
             if (res && onApplyState) onApplyState(res);
             onStateUpdated();
           })
           .catch((err) => console.error('Custom shock failed:', err));
-      } else if (selectedAnomaly) {
-        api.injectVolatility(selectedAnomaly.symbol, selectedAnomaly.delta, selectedAnomaly.volRatio, selectedAnomaly.reason)
+      } else {
+        api.injectVolatility(targetAnomaly.symbol, targetAnomaly.delta, targetAnomaly.volRatio, targetAnomaly.reason)
           .then((res) => {
             if (res && onApplyState) onApplyState(res);
             onStateUpdated();
@@ -182,7 +221,7 @@ export function EvaluatorDrawer({
 
   // Reset to Market Open
   const handleReset = () => {
-    onClose();
+    handleCloseClean();
     api.resetChaos()
       .then((res) => {
         setSimulatedNetworkDrop(false);
@@ -197,8 +236,8 @@ export function EvaluatorDrawer({
     if (activeTab === 'time_travel') return `Apply "${selectedPresetLabel}" & Close`;
     if (activeTab === 'shocks') {
       if (isCustomSelected) return `Apply ${customSymbol} (${customDelta >= 0 ? '+' : ''}${customDelta}%) & Close`;
-      if (selectedAnomaly) return `Apply ${selectedAnomaly.symbol} Shock & Close`;
-      return 'Apply Shock & Close';
+      const targetAnomaly = selectedAnomaly || PRESET_ANOMALIES[0];
+      return `Apply ${targetAnomaly.symbol} Shock & Close`;
     }
     if (activeTab === 'resilience') {
       return simulatedNetworkDrop ? 'Sever Network & Close' : 'Restore Network & Close';
@@ -591,10 +630,11 @@ export function EvaluatorDrawer({
               <button
                 type="button"
                 onClick={handleReset}
+                title="Reset session baseline to market open (09:15 AM IST) and clear active shocks"
                 className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-850 hover:bg-slate-800 text-slate-300 font-mono text-xs transition-colors border border-slate-700"
               >
                 <RotateCcw className="w-3.5 h-3.5 text-slate-400" />
-                <span>Reset (09:15 AM Open)</span>
+                <span>Reset to Market Open (09:15 AM)</span>
               </button>
 
               <button

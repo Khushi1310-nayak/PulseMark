@@ -19,7 +19,7 @@ export const chaosRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.status(400).send({ success: false, error: 'Symbol and deltaPercent are required' });
     }
 
-    const updated = mockStockService.injectVolatility(symbol, deltaPercent, volumeMultiplier, reason);
+    const updated = feedService.injectShock(symbol, deltaPercent, volumeMultiplier, reason);
     if (!updated) {
       return reply.status(404).send({ success: false, error: `Stock ${symbol} not found` });
     }
@@ -47,8 +47,11 @@ export const chaosRoutes: FastifyPluginAsync = async (fastify) => {
       message: `Injected ${deltaPercent}% volatility into ${symbol.toUpperCase()}`,
       data: {
         tick: updated,
+        ticks: [updated],
         auditLog: logEntry,
         attentionDesk: marketState.attentionDesk,
+        allEvaluations: marketState.allEvaluations,
+        normalTrading: marketState.normalTrading,
       },
     };
   });
@@ -71,6 +74,8 @@ export const chaosRoutes: FastifyPluginAsync = async (fastify) => {
         snapshot: newSnapshot,
         attentionDesk: evaluated.attentionDesk,
         allEvaluations: evaluated.allEvaluations,
+        normalTrading: evaluated.normalTrading,
+        ticks: feedService.getAllKnownTicks(),
       },
     };
   });
@@ -95,9 +100,10 @@ export const chaosRoutes: FastifyPluginAsync = async (fastify) => {
 
   // POST /api/chaos/reset
   fastify.post('/reset', async (request, reply) => {
+    feedService.clearShocks();
+    feedService.setSimulatedChaos(false, false);
     const freshSnapshot = deltaService.createDefaultMarketOpenSnapshot(DEFAULT_USER_ID);
     store.setSnapshot(DEFAULT_USER_ID, freshSnapshot);
-    feedService.setSimulatedChaos(false, false);
     const evaluated = deltaService.evaluateCurrentMarket(DEFAULT_USER_ID);
 
     return {
@@ -105,7 +111,11 @@ export const chaosRoutes: FastifyPluginAsync = async (fastify) => {
       message: 'State reset to standard market open benchmark (09:15 AM)',
       data: {
         snapshot: freshSnapshot,
+        ticks: feedService.getAllKnownTicks(),
         attentionDesk: evaluated.attentionDesk,
+        allEvaluations: evaluated.allEvaluations,
+        normalTrading: evaluated.normalTrading,
+        feedHealth: feedService.getHealth(),
       },
     };
   });

@@ -71,20 +71,24 @@ export function useMarketStream() {
 
   const handleIncomingPayload = useCallback(
     (payload: any) => {
-      const { ticks, attentionDesk, allEvaluations, snapshot, feedHealth } = payload;
+      const { ticks, tick, attentionDesk, allEvaluations, snapshot, feedHealth } = payload;
       const ticksMap: Record<string, StockTick> = {};
       const newFlashStates: Record<string, 'up' | 'down' | null> = {};
 
-      if (Array.isArray(ticks)) {
-        for (const tick of ticks) {
-          ticksMap[tick.symbol] = tick;
-          const prevPrice = prevPricesRef.current[tick.symbol];
-          if (prevPrice !== undefined && prevPrice !== tick.price) {
-            const dir = tick.price > prevPrice ? 'up' : 'down';
-            newFlashStates[tick.symbol] = dir;
-            triggerPriceFlash(tick.symbol, dir);
+      const tickList = Array.isArray(ticks) ? ticks : tick ? [tick] : [];
+
+      if (tickList.length > 0) {
+        for (const t of tickList) {
+          ticksMap[t.symbol] = t;
+          const prevPrice = prevPricesRef.current[t.symbol];
+          if (prevPrice !== undefined && prevPrice !== t.price) {
+            const dir = t.price > prevPrice ? 'up' : 'down';
+            newFlashStates[t.symbol] = dir;
+            triggerPriceFlash(t.symbol, dir);
+          } else if (prevPrice === undefined) {
+            // Initial price seed
           }
-          prevPricesRef.current[tick.symbol] = tick.price;
+          prevPricesRef.current[t.symbol] = t.price;
         }
       }
 

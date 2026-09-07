@@ -170,10 +170,16 @@ export class DeltaCalculationService {
         // 1 Day Ago: Prior session close baseline
         benchmarkPrice = tick.prevClose > 0 ? tick.prevClose : Number((tick.price * 0.995).toFixed(2));
         benchmarkVolume = Math.floor(tick.volume * 1.0);
+      } else if (minutesAgo >= 240) {
+        // 4 Hours Ago: Mid-day check baseline (mid-session VWAP & distinct intraday drift)
+        const midDayDrift = Math.cos(tick.symbol.charCodeAt(0) * 0.45) * 0.009;
+        const baseMid = tick.vwap > 0 ? tick.vwap : (tick.openPrice > 0 ? (tick.openPrice + tick.price) / 2 : tick.price);
+        benchmarkPrice = Number((baseMid * (1 + midDayDrift)).toFixed(2));
+        benchmarkVolume = Math.max(100, Math.floor(tick.volume * 0.5));
       } else if (minutesAgo >= 120) {
-        // 2 Hours / 4 Hours Ago: Market open or mid-day baseline
+        // 2 Hours Ago: Morning session baseline (anchored to opening bell levels)
         benchmarkPrice = tick.openPrice > 0 ? tick.openPrice : Number((tick.price * 0.998).toFixed(2));
-        benchmarkVolume = Math.max(100, Math.floor(tick.volume * 0.6));
+        benchmarkVolume = Math.max(100, Math.floor(tick.volume * 0.35));
       } else {
         // 15 Minutes Ago: Authentic micro-intraday drift (0.1% to 0.3%)
         const microDrift = Math.sin(tick.symbol.charCodeAt(0) * 0.3) * 0.002;
