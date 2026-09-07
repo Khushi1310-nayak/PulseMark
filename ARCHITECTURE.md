@@ -11,11 +11,11 @@
 2. [Monorepo Structure & Code Boundaries](#2-monorepo-structure--code-boundaries)
 3. [Data Ingestion & 3-Tier Circuit Breaker](#3-data-ingestion--3-tier-circuit-breaker)
 4. [The Event-Driven Anomaly Engine (Mathematical Model)](#4-the-event-driven-anomaly-engine-mathematical-model)
-5. [Multi-Temporal Baseline Architecture ($T_0$)](#5-multi-temporal-baseline-architecture-t_0)
+5. [Multi-Temporal Baseline Architecture (T₀)](#5-multi-temporal-baseline-architecture-t₀)
 6. [Real-Time Streaming Engine: SSE Architecture](#6-real-time-streaming-engine-sse-architecture)
 7. [Client-Side Reactive State & Tick Diffing](#7-client-side-reactive-state--tick-diffing)
 8. [High-Performance Catmull-Rom Canvas Renderer](#8-high-performance-catmull-rom-canvas-renderer)
-9. [Zero-Loss Session Lifecycle (`sendBeacon`)](#9-zero-loss-session-lifecycle-sendbeacon)
+9. [Zero-Loss Session Lifecycle (sendBeacon)](#9-zero-loss-session-lifecycle-sendbeacon)
 10. [Production Infrastructure & Deployment Topology](#10-production-infrastructure--deployment-topology)
 
 ---
@@ -26,33 +26,33 @@ PulseMark is built around an **asymmetric, event-driven data flow**. Instead of 
 
 ```mermaid
 flowchart TD
-    subgraph External["External Exchange & Data Sources"]
+    subgraph External ["External Exchange and Data Sources"]
         NSE["National Stock Exchange (NSE)"]
         YF["Yahoo Finance Live Ingestion Engine"]
         NSE --> YF
     end
 
-    subgraph BackendAPI["PulseMark Fastify API Engine (:3001)"]
-        FeedService["Feed Ingestion Service\n(Batching & Circuit Breaker)"]
-        DeltaService["Delta Calculation Service\n(Multi-Temporal Baselines)"]
-        Evaluator["Pure Anomaly Evaluator\n(Composite Scoring Formula)"]
-        SessionStore["Hybrid Persistence\n(Prisma SQLite/Postgres + Redis)"]
-        SSERouter["SSE Stream Router\n(/api/stream/ticks)"]
+    subgraph BackendAPI ["PulseMark Fastify API Engine (:3001)"]
+        FeedService["Feed Ingestion Service (Batching and Circuit Breaker)"]
+        DeltaService["Delta Calculation Service (Multi-Temporal Baselines)"]
+        Evaluator["Pure Anomaly Evaluator (Composite Scoring Formula)"]
+        SessionStore["Hybrid Persistence (Prisma SQLite / Redis)"]
+        SSERouter["SSE Stream Router (/api/stream/ticks)"]
 
-        YF -->|Raw Ticks (2.5s loop)| FeedService
-        FeedService -->|Normalised StockTick[]| DeltaService
+        YF -->|Raw Ticks Every 2.5s| FeedService
+        FeedService -->|Normalized Stock Ticks| DeltaService
         DeltaService -->|Session Benchmark T0| Evaluator
-        Evaluator -->|Attention Desk & Normal Sets| SSERouter
+        Evaluator -->|Attention Desk and Normal Sets| SSERouter
         DeltaService <--> SessionStore
     end
 
-    subgraph ClientApp["PulseMark Next.js 14 Web Terminal (:3000)"]
-        useMarketStream["useMarketStream Hook\n(Auto-reconnect & Heartbeat)"]
-        DiffEngine["Ref-Based Micro Flash Engine\n(Green/Red Color Interpolation)"]
-        AttentionDeskUI["Attention Desk\n(Top Deck Priority Cards)"]
-        WatchlistUI["High-Density Watchlist Matrix\n(30M Splines & 52W Bars)"]
-        CanvasChart["Catmull-Rom Spline Canvas\n(Retina 2x Coordinate Normalizer)"]
-        BeaconSender["sendBeacon Lifecycle Manager\n(VisibilityChange & Unload)"]
+    subgraph ClientApp ["PulseMark Next.js 14 Web Terminal (:3000)"]
+        useMarketStream["useMarketStream Hook (Auto-reconnect and Heartbeat)"]
+        DiffEngine["Ref-Based Micro Flash Engine (Green/Red Transition)"]
+        AttentionDeskUI["Attention Desk (Top Priority Cards)"]
+        WatchlistUI["High-Density Watchlist Matrix (30M Splines and 52W Bars)"]
+        CanvasChart["Catmull-Rom Spline Canvas (Retina 2x Normalizer)"]
+        BeaconSender["sendBeacon Lifecycle Manager (VisibilityChange and Unload)"]
 
         SSERouter -->|HTTP/2 Server-Sent Events| useMarketStream
         useMarketStream --> DiffEngine
@@ -118,12 +118,12 @@ stateDiagram-v2
 
     state Tier1_LiveExchange {
         [*] --> FetchingQuotes
-        FetchingQuotes --> ParseAndValidate: 200 OK
+        FetchingQuotes --> ParseAndValidate: HTTP 200 OK
         ParseAndValidate --> UpdateRedisCache: Valid Prices
         UpdateRedisCache --> BroadcastTicks
     }
 
-    Tier1_LiveExchange --> Tier2_StaleRedisCache: Upstream Rate-Limit / HTTP 5xx
+    Tier1_LiveExchange --> Tier2_StaleRedisCache: Upstream Rate-Limit or Network Drop
     
     state Tier2_StaleRedisCache {
         [*] --> ReadLatestSnapshot
@@ -131,15 +131,15 @@ stateDiagram-v2
         MarkIsStaleTrue --> NotifyUIWithStalePill
     }
 
-    Tier2_StaleRedisCache --> Tier3_SyntheticMock: Redis Cache Miss / Cold Boot
+    Tier2_StaleRedisCache --> Tier3_SyntheticMock: Redis Cache Miss or Cold Boot
     
     state Tier3_SyntheticMock {
         [*] --> GenerateBrownianMotion
         GenerateBrownianMotion --> MarkSimulationMode
     }
 
-    Tier2_StaleRedisCache --> Tier1_LiveExchange: Next Ingestion Cycle Succeeds (Self-Healing)
-    Tier3_SyntheticMock --> Tier1_LiveExchange: Upstream Service Restored
+    Tier2_StaleRedisCache --> Tier1_LiveExchange: Ingestion Restored (Self-Healing)
+    Tier3_SyntheticMock --> Tier1_LiveExchange: Upstream Connection Restored
 ```
 
 ### Tiers Explained:
@@ -161,26 +161,26 @@ Unlike standard watchlists that show only simple 24-hour percentage changes ($P_
 $$\text{Anomaly Score} = \min\left(100, \sum_{i=1}^{5} w_i \cdot \phi_i\right)$$
 
 ```mermaid
-flowchart LR
+flowchart TD
     Tick["Live Quote (T_now)"]
-    T0["Baseline State (T0)"]
+    T0["Session Baseline (T0)"]
 
-    subgraph EvaluatorDimensions["5 Evaluator Dimensions"]
-        D1["φ_price: Price Shift vs T0\n(|ΔP| ≥ 1.5% -> 30pts\n|ΔP| ≥ 3.0% -> 45pts)"]
-        D2["φ_vol: Volume Surge Multiplier\n(V_ratio ≥ 2.0x -> 25pts\nV_ratio ≥ 3.0x -> 35pts)"]
-        D3["φ_range: Session Range Breach\n(Resistance pierced -> 25pts\nSupport broken -> 30pts)"]
-        D4["φ_vwap: Intraday VWAP Divergence\n(|ΔVWAP| ≥ 1.2% -> 15pts)"]
-        D5["φ_spread: Order Book Liquidity\n(Compression -> 5pts\nWidening -> 10pts)"]
+    subgraph Dimensions ["5 Anomaly Evaluator Dimensions"]
+        D1["φ_price: Price Shift vs T0 (|ΔP| ≥ 1.5% to 3.0%)"]
+        D2["φ_vol: Volume Surge Multiplier (V_ratio ≥ 2.0x to 3.5x)"]
+        D3["φ_range: Session Range Breach (Support / Resistance)"]
+        D4["φ_vwap: Intraday VWAP Divergence (|ΔVWAP| ≥ 1.2%)"]
+        D5["φ_spread: Order Book Spread Compression / Widening"]
     end
 
-    Tick --> D1 & D2 & D3 & D4 & D5
-    T0 --> D1 & D2 & D3 & D4 & D5
+    Tick --> Dimensions
+    T0 --> Dimensions
 
-    D1 & D2 & D3 & D4 & D5 --> Sum["Composite Score (0 - 100)"]
+    Dimensions --> Sum["Composite Anomaly Score (0 to 100)"]
 
-    Sum --> Check{"Score ≥ 35 OR\nCritical Reason?"}
-    Check -->|YES| AttentionDesk["🔥 Attention Desk\n(Promoted to Priority Deck)"]
-    Check -->|NO| NormalTrading["📋 Normal Trading\n(Standard Watchlist View)"]
+    Sum --> Check{"Score ≥ 35 OR Critical Reason?"}
+    Check -->|YES| AttentionDesk["🔥 Attention Desk (Priority Deck Promotion)"]
+    Check -->|NO| NormalTrading["📋 Normal Trading (Standard Watchlist View)"]
 ```
 
 ### Dimension Details:
@@ -192,7 +192,7 @@ flowchart LR
 
 ---
 
-## 5. Multi-Temporal Baseline Architecture ($T_0$)
+## 5. Multi-Temporal Baseline Architecture (T₀)
 
 A key architectural innovation in PulseMark is the **Session Reference Anchor ($T_0$)**.
 
@@ -200,21 +200,23 @@ A key architectural innovation in PulseMark is the **Session Reference Anchor ($
 Traditional brokers calculate percentage change from yesterday's closing price at 3:30 PM. But if a trader logged in at 11:00 AM, stepped away, and returned at 2:00 PM, yesterday's close is irrelevant. What matters is: **"What changed during the 3 hours I was away?"**
 
 ```mermaid
-gantt
-    title Session Baseline Timeline vs. Traditional 24H Change
-    dateFormat  HH:mm
-    axisFormat  %H:%M
+flowchart TD
+    subgraph TraditionalBroker ["Traditional Broker 24H Daily Clock"]
+        direction TB
+        TPrev["Yesterday 3:30 PM Close"]
+        TNowOld["Current Market Time"]
+        TPrev -->|Fixed Midnight Baseline| TNowOld
+        NoteOld["Fails to show what happened while you were away!"]
+    end
 
-    section Traditional Broker
-    Yesterday Close (3:30 PM)      :crit, a1, 09:15, 15:30
-    24H % Change (Fixed Reference) :crit, a2, 09:15, 15:30
-
-    section PulseMark
-    Session Login / Morning Check  :active, b1, 09:15, 11:30
-    User Departed (T0 Anchor Captured) :done, b2, 11:30, 11:30
-    Away from Desk (Elapsed Window):milestone, 11:30, 14:00
-    User Returns (T_now)           :active, b3, 14:00, 15:30
-    Delta Computed Exactly (T_now - T0) :active, b4, 14:00, 15:30
+    subgraph PulseMarkAnchor ["PulseMark Session Reference Baseline (T0)"]
+        direction TB
+        TDepart["User Departs Desk (T0 Anchor Captured)"]
+        AwayDesk["Away Window: 15m, 2h, 4h, 1d, 1w"]
+        TReturn["User Returns to Desk (T_now)"]
+        TDepart --> AwayDesk --> TReturn
+        TReturn -->|Exact Delta Diffing: T_now - T0| IsolatedShift["Isolates ONLY Actionable Shifts Since Departure"]
+    end
 ```
 
 ### Handling Mid-Session Additions (Edge-Case Protection)
@@ -236,7 +238,7 @@ sequenceDiagram
     participant Feed as Live NSE Feed Service
 
     Browser->>Fastify: GET /api/stream/ticks (Accept: text/event-stream)
-    Fastify-->>Browser: HTTP/2 200 OK (Content-Type: text/event-stream)
+    Fastify-->>Browser: HTTP/2 200 OK (text/event-stream)
     Fastify-->>Browser: event: initial_snapshot (18 Ticks + T0 Snapshot + Attention Desk)
     
     loop Every 2.5 Seconds
@@ -249,8 +251,6 @@ sequenceDiagram
         Browser->>Fastify: POST /api/session/heartbeat
         Fastify-->>Browser: 200 OK (Keep-Alive Timestamp Renewed)
     end
-
-    Note over Browser,Fastify: If connection drops, EventSource auto-reconnects with exponential backoff.
 ```
 
 ### Architectural Decision Record (ADR): SSE vs. WebSockets
@@ -289,24 +289,25 @@ Standard charting libraries (Chart.js, Recharts) use heavy SVG DOM nodes that co
 
 ```mermaid
 flowchart TD
-    Data["Raw 40-Candle Price History\n(Open, High, Low, Close, Volume)"]
-    Retina["High-DPI Coordinate Normalizer\n(ctx.scale(dpr, dpr))"]
+    Data["Raw 40-Candle Price History (Open, High, Low, Close, Volume)"]
+    Retina["High-DPI Coordinate Normalizer (ctx.scale)"]
     
-    subgraph SplinePipeline["Catmull-Rom Spline Drawing Pipeline"]
-        CP["Compute Tangent Control Points\nCP1 = P1 + (P2 - P0) / 6\nCP2 = P2 - (P3 - P1) / 6"]
-        Curve["ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, p2x, p2y)\nC1 Continuous Smooth Curve"]
-        Grad["Volumetric Linear Gradient Fill\n(rgba(16, 185, 129, 0.25) -> transparent)"]
+    subgraph SplinePipeline ["Catmull-Rom Spline Drawing Pipeline"]
+        CP["Compute Tangent Control Points: CP1 and CP2"]
+        Curve["ctx.bezierCurveTo: C1 Continuous Smooth Curve"]
+        Grad["Volumetric Linear Gradient Fill (Emerald / Rose)"]
+        CP --> Curve --> Grad
     end
 
-    subgraph OverlayPipeline["Interactive Overlays"]
+    subgraph OverlayPipeline ["Interactive Canvas Overlays"]
         Guideline["Floating T0 Session Baseline Guideline"]
-        Crosshair["Interactive Hover Crosshair & Dynamic Price Pill"]
+        Crosshair["Interactive Hover Crosshair and Price Pill"]
         VolumeHist["Intraday Volume Histogram (Bottom 18%)"]
     end
 
     Data --> Retina
-    Retina --> CP --> Curve --> Grad
-    Retina --> Guideline & Crosshair & VolumeHist
+    Retina --> SplinePipeline
+    Retina --> OverlayPipeline
 ```
 
 ### Mathematical Advantages of Catmull-Rom Splines:
@@ -315,7 +316,7 @@ flowchart TD
 
 ---
 
-## 9. Zero-Loss Session Lifecycle (`sendBeacon`)
+## 9. Zero-Loss Session Lifecycle (sendBeacon)
 
 When a user closes their browser window or switches tabs, normal `fetch()` or `XMLHttpRequest` calls are often aborted by the browser before the HTTP payload leaves the network interface.
 
@@ -329,10 +330,9 @@ sequenceDiagram
     participant API as Fastify Session Receiver
 
     Trader->>Browser: Closes Browser Window or Switches Tab
-    Browser->>Browser: Dispatches 'visibilitychange' (state === 'hidden')
+    Browser->>Browser: Dispatches visibilitychange (state === 'hidden')
     Browser->>Browser: Serializes active session prices into JSON
-    Browser->>API: navigator.sendBeacon('/api/session/snapshot', jsonPayload)
-    Note over Browser,API: Browser OS network stack completes transmission asynchronously.
+    Browser->>API: navigator.sendBeacon(/api/session/snapshot, jsonPayload)
     API->>API: Custom text/plain parser extracts JSON body
     API->>API: Commits exit snapshot T0 to database / store
 ```
@@ -362,31 +362,31 @@ PulseMark is architected for decoupled cloud deployment:
 flowchart TD
     TraderClient["Trader Client Browser"]
 
-    subgraph VercelEdge["Vercel Global Edge Network"]
-        NextFrontend["Next.js 14 App Router\n(https://pulse-mark-web.vercel.app)"]
-        NextRewrite["Next.js Route Rewriter\n(/api/:path* -> Cloud VM)"]
+    subgraph VercelEdge ["Vercel Global Edge Network"]
+        NextFrontend["Next.js 14 App Router (pulse-mark-web.vercel.app)"]
+        NextRewrite["Next.js Route Rewriter (/api/:path*)"]
         NextFrontend --> NextRewrite
     end
 
-    subgraph CloudVM["Google Cloud Compute Engine VM (136.116.1.206)"]
-        Nginx["Nginx Reverse Proxy\n(Port 80 -> Proxy Pass)"]
+    subgraph CloudVM ["Google Cloud Compute Engine VM (136.116.1.206)"]
+        Nginx["Nginx Reverse Proxy (Port 80)"]
         PM2["PM2 Process Manager"]
-        FastifyServer["Fastify 4.x Production Server\n(Port 3001)"]
-        RedisInstance["Redis In-Memory Cache\n(Port 6379)"]
+        FastifyServer["Fastify 4.x Production Server (Port 3001)"]
+        RedisInstance["Redis In-Memory Cache (Port 6379)"]
 
         Nginx -->|proxy_buffering off| FastifyServer
-        PM2 -->|Keeps Alive| FastifyServer
+        PM2 -->|Process Monitor| FastifyServer
         FastifyServer <--> RedisInstance
     end
 
-    subgraph ExchangeData["External Live Feed"]
+    subgraph ExchangeData ["External Live Feed"]
         YahooNSE["Yahoo Finance (NSE Live Quotes)"]
-        FastifyServer <-->|Batch REST Quotes (2.5s)| YahooNSE
+        FastifyServer <-->|Batch REST Quotes Every 2.5s| YahooNSE
     end
 
-    TraderClient -->|HTTPS (HTML/JS/Assets)| NextFrontend
+    TraderClient -->|HTTPS (Frontend Delivery)| NextFrontend
     TraderClient -->|SSE / REST API Requests| Nginx
-    NextRewrite -->|Backend Rewrites| Nginx
+    NextRewrite -->|Backend Proxy Pass| Nginx
 ```
 
 ### Production Checklist Verified:
